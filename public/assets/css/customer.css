@@ -1,0 +1,124 @@
+/* Dashboard cartoon skin (customer and admin): the landing page's cartoon look (thick ink outlines,
+   hard shadows, sticker buttons, halftone sky). Loaded after dash.css on customer/ and admin/ pages. */
+:root{
+  --bg:#BFE6FF; --dots:#A6DBFF; --surface:#FFFFFF; --soft:#EEF6FF; --ink:#1B1530;
+  --line:#1B1530; --line2:#1B1530; --fg:#1B1530; --muted:#4F4A6B; --faint:#6E6890;
+  --brand:#7B5CFF; --brand-2:#6243F2; --brand-soft:#ECE6FF; --on-brand:#FFFFFF;
+  --pop:#FFD23F; --pink:#FF5C8A; --mint:#2EE6A6; --sky:#3DB7FF; --on-pop:#1B1530;
+  --ok:#0B8F62; --ok-soft:#CFF8E9; --warn:#A35F00; --warn-soft:#FFF0C2; --bad:#E5334B; --bad-soft:#FFE0E6;
+  --display:"Lilita One","Arial Rounded MT Bold",ui-rounded,system-ui,sans-serif;
+  --body:"Nunito",ui-rounded,system-ui,sans-serif;
+  --b:3px solid var(--ink); --sh:5px 5px 0 var(--ink); --sh-sm:3px 3px 0 var(--ink); --r:22px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1C1740; --dots:#252055; --surface:#2B2560; --soft:#352E70; --ink:#0A0720;
+  --line:#0A0720; --line2:#0A0720; --fg:#FFF5DE; --muted:#C9C2EA; --faint:#A9A1D6;
+  --brand-soft:#3B3286; --ok:#3DE0A6; --ok-soft:#14473A; --warn:#FFC24D; --warn-soft:#4A3A12; --bad:#FF6B80; --bad-soft:#4A1B2A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1C1740; --dots:#252055; --surface:#2B2560; --soft:#352E70; --ink:#0A0720;
+  --line:#0A0720; --line2:#0A0720; --fg:#FFF5DE; --muted:#C9C2EA; --faint:#A9A1D6;
+  --brand-soft:#3B3286; --ok:#3DE0A6; --ok-soft:#14473A; --warn:#FFC24D; --warn-soft:#4A3A12; --bad:#FF6B80; --bad-soft:#4A1B2A; color-scheme:dark}
+
+body{font:600 16px/1.55 var(--body);background:var(--bg);background-image:radial-gradient(var(--dots) 2px,transparent 2.5px);background-size:22px 22px}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;letter-spacing:.01em}
+:focus-visible{outline:3px dashed var(--brand);outline-offset:3px}
+
+/* shell */
+.app{background:linear-gradient(90deg,var(--surface) 249px,var(--ink) 249px,var(--ink) 252px,transparent 252px)}
+.side{border-right:0}
+@media (max-width:980px){.app{background:none}}
+.side{background:var(--surface);color:var(--fg);border-right:var(--b);padding:18px 14px}
+.side .brand{color:var(--fg);font-size:26px}
+.side .brand b{color:var(--brand)}
+.side .brand img{filter:none}
+.side .area{background:var(--pop);color:var(--on-pop);border:2px solid var(--ink);font-weight:900;box-shadow:2px 2px 0 var(--ink)}
+.side .group{color:var(--muted);font-weight:900}
+.side a.nav-i,.side button.nav-i{color:var(--fg);font-weight:800;font-size:15.5px;border:2px solid transparent;border-radius:14px}
+.side .nav-i:hover{background:var(--soft);color:var(--fg)}
+.side .nav-i[aria-current="page"]{background:var(--pop);color:var(--on-pop);border-color:var(--ink);box-shadow:var(--sh-sm)}
+.side .nav-i .ct{background:var(--brand);color:#fff;border:2px solid var(--ink)}
+.side .nav-i[aria-current="page"] .ct{background:var(--brand)}
+.side .nav-i .ct.hot{background:var(--pink);color:var(--on-pop)}
+.side .nav-i.out{color:var(--bad)}
+.top{background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:var(--b)}
+.top h1{font-size:30px;font-weight:400}
+.top .sub{font-weight:700}
+.who{border:var(--b);box-shadow:var(--sh-sm)}
+.who .av{background:var(--brand);border:2px solid var(--ink)}
+.who b{font-weight:900}
+.menu-btn{border:var(--b);box-shadow:var(--sh-sm)}
+@media (max-width:980px){.side{border-right:var(--b)}}
+
+/* blocks */
+.panel,.kpi,.tbl-wrap,.ptile{border:var(--b);box-shadow:var(--sh);border-radius:var(--r)}
+.panel-h h2{font-size:24px;font-weight:400}
+.panel-h p{font-weight:700}
+.kpi{transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
+.kpi:hover{transform:translate(-2px,-3px) rotate(-.5deg)}
+.kpi .ic{border:2px solid var(--ink);border-radius:14px;background:var(--pop);color:var(--on-pop);box-shadow:2px 2px 0 var(--ink)}
+.kpi .ic.ok{background:var(--mint);color:var(--on-pop)} .kpi .ic.warn{background:var(--pink);color:var(--on-pop)} .kpi .ic.bad{background:var(--bad);color:#fff}
+.kpi .k{font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.kpi .v{font-family:var(--display);font-weight:400;font-size:clamp(20px,1.85vw,30px);letter-spacing:.01em;white-space:nowrap}
+.vbar{border:2px solid var(--ink);border-bottom:0;border-radius:8px 8px 0 0}
+.vbar[style*="height:0%"]{border:0}
+.kpi .s{font-weight:700}
+
+.hello{background:var(--brand);border:var(--b);box-shadow:var(--sh);border-radius:26px;padding:24px 26px;isolation:isolate}
+.hello::before{content:"";position:absolute;inset:0;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.22) 2px,transparent 2.6px);background-size:20px 20px}
+.hello::after{border:3px solid var(--ink);background:var(--pop);width:150px;height:150px;right:-40px;top:auto;bottom:-70px;z-index:-1}
+.hello h2{font-family:var(--display);font-weight:400;font-size:34px;text-shadow:3px 3px 0 var(--ink)}
+.hello p{font-weight:800;opacity:1}
+.hello .toon-peek{width:92px;height:auto;flex:none;transform:rotate(6deg);filter:drop-shadow(3px 3px 0 rgba(10,7,32,.35))}
+.hello .hello-l{display:flex;align-items:center;gap:16px;min-width:0}
+
+/* buttons */
+.btn{height:42px;border:var(--b);border-radius:14px;background:var(--pop);color:var(--on-pop);font-weight:900;box-shadow:var(--sh-sm);transition:transform .12s,box-shadow .12s}
+.btn:hover{background:var(--pop);transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.btn.ghost,.btn.white{background:var(--surface);color:var(--fg);border-color:var(--ink)}
+.btn.ghost:hover{color:var(--fg);border-color:var(--ink)}
+.btn.soft{background:var(--mint);color:var(--on-pop)}
+.btn.danger,.btn.danger.ghost{background:var(--bad);color:#fff;border-color:var(--ink)}
+.btn.sm{height:36px;border-radius:12px}
+.btn.xs{height:32px;border-width:2px;border-radius:10px;box-shadow:2px 2px 0 var(--ink)}
+.link{color:var(--pink);font-weight:900}
+
+/* tables, badges, lists */
+th{background:var(--pop);color:var(--on-pop);border-bottom:var(--b);font-weight:900}
+td{border-bottom:2px dashed var(--soft);font-weight:700}
+tbody tr:hover td{background:var(--soft)}
+.badge{border:2px solid var(--ink);font-weight:900;color:var(--on-pop);background:var(--surface)}
+.badge::before{display:none}
+.badge.ok{background:var(--mint);color:var(--on-pop)} .badge.warn{background:var(--pop);color:var(--on-pop)} .badge.bad{background:var(--pink);color:var(--on-pop)} .badge.brand{background:var(--brand);color:#fff} .badge.plain{background:var(--soft);color:var(--fg)}
+.row-i{border-bottom:2px dashed var(--soft)}
+.row-i b{font-weight:900}
+.thumb{border:2px solid var(--ink);border-radius:10px}
+.kpi-dot{border:2px solid var(--ink);background:var(--pop);color:var(--on-pop);box-shadow:2px 2px 0 var(--ink)}
+.empty .eic{border:var(--b);background:var(--pop);color:var(--on-pop);box-shadow:var(--sh-sm);border-radius:18px}
+.empty h3{font-family:var(--display);font-weight:400;font-size:24px}
+.empty p{font-weight:700}
+.stars{color:var(--pop);-webkit-text-stroke:1px var(--ink)}
+.stars i.off{color:transparent;-webkit-text-stroke:1px var(--muted)}
+
+/* plugin tiles */
+.ptile{transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .18s}
+.ptile:hover{transform:translate(-3px,-4px) rotate(-.6deg);box-shadow:8px 9px 0 var(--ink)}
+.ptile .pc{border-bottom:var(--b)}
+.ptile h3{font-family:var(--display);font-weight:400;font-size:22px}
+.ptile .meta{font-weight:700}
+
+/* forms */
+.field label,.field .lab{font-weight:900}
+.field input,.field select,.field textarea,.search input{border:var(--b);border-radius:12px;font-weight:700}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:3px 3px 0 var(--brand)}
+.field input[readonly]{background:var(--soft)}
+.toggle{font-weight:800}
+.toggle input{border:2px solid var(--ink);height:26px;width:46px}
+.toggle input::after{top:2px;left:2px;border:2px solid var(--ink);box-shadow:none}
+.toggle input:checked{background:var(--mint)}
+.toggle input:checked::after{transform:translateX(20px)}
+.pw button{color:var(--brand);font-weight:900}
+.callout{border:var(--b);box-shadow:var(--sh-sm);border-radius:16px;font-weight:700}
+.toast{background:var(--pop);color:var(--on-pop);border:var(--b);box-shadow:var(--sh-sm);transform:translate(-50%,20px) rotate(-2deg);font-weight:900}
+.toast.on{transform:translate(-50%,0) rotate(-2deg)}
+@media (max-width:560px){.kpi .v{font-size:26px}.hello h2{font-size:28px}.hello .toon-peek{width:64px}}

@@ -1,0 +1,335 @@
+/* ==========================================================================
+   ToonApp Hub · components.css
+   Small shared helpers used by both the store pages and the dashboards.
+   These replace every inline style="" attribute, so pages stay pure HTML.
+   ========================================================================== */
+
+[hidden] {
+    display: none !important;
+}
+
+/* ---------- layout helpers ---------- */
+.min-w-0 {
+    min-width: 0;
+}
+.vbar.h-0 {
+    border: 0;
+}
+.w-full {
+    width: 100% !important;
+}
+.min-w-220 {
+    min-width: 220px;
+}
+.ml-auto {
+    margin-left: auto;
+}
+.mt-8 {
+    margin-top: 8px;
+}
+.mt-10 {
+    margin-top: 10px;
+}
+.mt-14 {
+    margin-top: 14px;
+}
+.self-start {
+    align-self: start;
+}
+.text-center {
+    text-align: center;
+}
+.row-i.row-top {
+    align-items: flex-start;
+}
+.cmeta.cmeta-left {
+    justify-content: start;
+    gap: 8px;
+}
+.contact-head.head-compact {
+    padding-block: 10px 18px;
+}
+.icon-btn {
+    position: relative;
+}
+.acts.align-left {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+.cta.cta-center {
+    justify-content: center;
+}
+.callout.callout-stack {
+    flex-direction: column;
+    gap: 10px;
+}
+.note.note-spaced {
+    margin: 12px 0 0;
+}
+.chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.host-list {
+    display: flex !important;
+    gap: 4px !important;
+}
+.form-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+.summary-link {
+    cursor: pointer;
+    font-weight: 700;
+}
+.plain-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ---------- text sizes ---------- */
+.fs-28 {
+    font-size: 28px;
+}
+.fs-34 {
+    font-size: 34px;
+}
+.section-title {
+    font-size: 40px;
+    margin-bottom: 6px;
+}
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 900;
+}
+
+/* ---------- textarea heights ---------- */
+textarea.min-h-70 {
+    min-height: 70px;
+}
+textarea.min-h-90 {
+    min-height: 90px;
+}
+textarea.min-h-140 {
+    min-height: 140px;
+}
+textarea.min-h-170 {
+    min-height: 170px;
+}
+
+/* ---------- colour chips (step numbers, contact icons) ---------- */
+.bg-yellow {
+    background: var(--yellow) !important;
+}
+.bg-pink {
+    background: var(--pink) !important;
+}
+.bg-mint {
+    background: var(--mint) !important;
+}
+.bg-red {
+    background: var(--red) !important;
+    color: #fff !important;
+}
+.bg-soft {
+    background: var(--soft) !important;
+    color: var(--fg) !important;
+}
+
+/* ---------- app badges (AE, PR, …) ---------- */
+.host-ae {
+    background: #6b4eff !important;
+}
+.host-pr {
+    background: #b04bd8 !important;
+}
+.host-dr {
+    background: #e3652b !important;
+}
+.host-c4d {
+    background: #1f7ae0 !important;
+}
+.host-bl {
+    background: #e8871e !important;
+}
+.host-fcp {
+    background: #2f2f3a !important;
+}
+
+/* ---------- plugin page banner hue ---------- */
+.hue-0 {
+    --h: 0;
+}
+.hue-30 {
+    --h: 30;
+}
+.hue-60 {
+    --h: 60;
+}
+.hue-90 {
+    --h: 90;
+}
+.hue-120 {
+    --h: 120;
+}
+.hue-150 {
+    --h: 150;
+}
+.hue-180 {
+    --h: 180;
+}
+.hue-210 {
+    --h: 210;
+}
+.hue-240 {
+    --h: 240;
+}
+.hue-270 {
+    --h: 270;
+}
+.hue-300 {
+    --h: 300;
+}
+.hue-330 {
+    --h: 330;
+}
+.flag.flag-top {
+    z-index: 1;
+}
+
+/* ---------- bar widths and heights (5% steps) ---------- */
+.w-0 {
+    width: 0% !important;
+}
+.w-5 {
+    width: 5% !important;
+}
+.w-10 {
+    width: 10% !important;
+}
+.w-15 {
+    width: 15% !important;
+}
+.w-20 {
+    width: 20% !important;
+}
+.w-25 {
+    width: 25% !important;
+}
+.w-30 {
+    width: 30% !important;
+}
+.w-35 {
+    width: 35% !important;
+}
+.w-40 {
+    width: 40% !important;
+}
+.w-45 {
+    width: 45% !important;
+}
+.w-50 {
+    width: 50% !important;
+}
+.w-55 {
+    width: 55% !important;
+}
+.w-60 {
+    width: 60% !important;
+}
+.w-65 {
+    width: 65% !important;
+}
+.w-70 {
+    width: 70% !important;
+}
+.w-75 {
+    width: 75% !important;
+}
+.w-80 {
+    width: 80% !important;
+}
+.w-85 {
+    width: 85% !important;
+}
+.w-90 {
+    width: 90% !important;
+}
+.w-95 {
+    width: 95% !important;
+}
+.w-100 {
+    width: 100% !important;
+}
+.h-0 {
+    height: 0% !important;
+}
+.h-5 {
+    height: 5% !important;
+}
+.h-10 {
+    height: 10% !important;
+}
+.h-15 {
+    height: 15% !important;
+}
+.h-20 {
+    height: 20% !important;
+}
+.h-25 {
+    height: 25% !important;
+}
+.h-30 {
+    height: 30% !important;
+}
+.h-35 {
+    height: 35% !important;
+}
+.h-40 {
+    height: 40% !important;
+}
+.h-45 {
+    height: 45% !important;
+}
+.h-50 {
+    height: 50% !important;
+}
+.h-55 {
+    height: 55% !important;
+}
+.h-60 {
+    height: 60% !important;
+}
+.h-65 {
+    height: 65% !important;
+}
+.h-70 {
+    height: 70% !important;
+}
+.h-75 {
+    height: 75% !important;
+}
+.h-80 {
+    height: 80% !important;
+}
+.h-85 {
+    height: 85% !important;
+}
+.h-90 {
+    height: 90% !important;
+}
+.h-95 {
+    height: 95% !important;
+}
+.h-100 {
+    height: 100% !important;
+}
+
+/* ---------- mascot: second tear starts a little later ---------- */
+.tear.tear-late {
+    animation-delay: 0.3s;
+}
