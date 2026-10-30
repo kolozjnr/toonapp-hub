@@ -64,15 +64,13 @@
     size() { try { return (localStorage.getItem(KEY) || "").length; } catch (e) { return 0; } }
   };
 
-  /* first visit: two example plugins so the shelf isn't empty */
-  if (!data.meta || !data.meta.seeded) {
-    const now = Date.now();
+  /* The store now loads plugins from the database. Remove the demo listings
+     that older versions of this app seeded into localStorage. */
+  if (!data.meta || !data.meta.cleaned) {
     data.products = data.products || {};
-    if (!Object.keys(data.products).length) {
-      data.products["example-1"] = { name: "Example: Squash & Stretch", tagline: "Sample listing. Edit it into your own plugin or delete it.", description: "This is an example so you can see how a plugin looks on your shelf. Open the admin dashboard, then Plugins, then Edit to replace it with your own plugin.", features: ["Your first feature goes here", "Your second feature goes here", "One feature per line in the upload form"], price: 29, was: 39, category: "Plugin", badge: "Sale", hosts: ["AE"], version: "1.0.0", compat: "After Effects 2024 and newer", live: true, cover: null, youtube: null, shots: [], createdAt: now, updatedAt: now };
-      data.products["example-2"] = { name: "Example: Bounce Presets", tagline: "Sample free listing. Replace it with your own.", description: "An example of a free plugin listing. Set the price to 0 to give a plugin away for free.", features: ["Shows how a free plugin looks", "Edit or delete it from your dashboard"], price: 0, was: null, category: "Preset pack", badge: "Free", hosts: ["AE", "PR"], version: "1.0.0", compat: "After Effects and Premiere Pro 2023+", live: true, cover: null, youtube: null, shots: [], createdAt: now - 1000, updatedAt: now - 1000 };
-    }
-    data.meta = { seeded: true };
+    delete data.products["example-1"];
+    delete data.products["example-2"];
+    data.meta = { ...(data.meta || {}), seeded: true, cleaned: true };
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
   }
 

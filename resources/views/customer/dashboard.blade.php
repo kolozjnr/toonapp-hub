@@ -1,139 +1,7 @@
 <x-app-layout>
         <div class="app">
-            <nav aria-label="Account" class="side" id="sidebar">
-                <a class="brand" href="../index.html"
-                    ><img alt="" src="../assets/images/logo.png" />ToonApp <b>Hub</b></a
-                >
-                <span class="area">Customer</span>
-                <div class="group">Account</div>
-                <a aria-current="page" class="nav-i" href="dashboard.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg
-                    >Dashboard</a
-                ><a class="nav-i" href="plugins.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M21 8 12 3 3 8v8l9 5 9-5z"></path>
-                        <path d="m3 8 9 5 9-5M12 13v8"></path></svg
-                    >My plugins<span class="ct">2</span></a
-                ><a class="nav-i" href="orders.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path>
-                        <path d="M9 8h6M9 12h6"></path></svg
-                    >Orders<span class="ct">2</span></a
-                ><a class="nav-i" href="updates.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path>
-                        <path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg
-                    >Updates<span class="ct hot">2</span></a
-                ><a class="nav-i" href="settings.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path
-                            d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
-                        ></path></svg
-                    >Settings</a
-                >
-                <div class="spacer"></div>
-                <a class="nav-i" href="../index.html"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M4 9.5 5.5 4h13L20 9.5"></path>
-                        <path d="M4 9.5h16v1a3 3 0 0 1-5.3 1.9 3 3 0 0 1-5.4 0A3 3 0 0 1 4 10.5z"></path>
-                        <path d="M5 12.5V20h14v-7.5"></path></svg
-                    >Back to store</a
-                >
-                  <form class="nav-i out" href="route('logout')" method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                    <svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"></path></svg
-                    >Log out</a
-                >
-                </form>
-                {{-- <a class="nav-i out" href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();"
-                    ><svg
-                        fill="none"
-                        height="18"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                        width="18"
-                    >
-                        <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"></path></svg
-                    >Log out</a
-                > --}}
-            </nav>
+          
+            @include('layouts.admin-nav')
             <div class="app-main">
                 <header class="top">
                     <button
@@ -162,7 +30,7 @@
                         <div class="sub">Your plugins, orders and updates at a glance.</div>
                     </div>
                     <div class="top-right">
-                        <a class="btn ghost sm store-link" href="../index.html#shop"
+                        <a class="btn ghost sm store-link" href="{{ route('home') }}#shop"
                             ><svg
                                 fill="none"
                                 height="18"
@@ -237,7 +105,7 @@
                                 <p>You own 2 plugins. Download them any time from My plugins.</p>
                             </div>
                         </div>
-                        <a class="btn white" href="plugins.html">Go to My plugins</a>
+                        <a class="btn white" href="{{ route('customer.plugins') }}">Go to My plugins</a>
                     </section>
                     <section class="kpis">
                         <div class="kpi">
@@ -333,7 +201,7 @@
                                     <h2>Recent plugins</h2>
                                     <p>Your latest purchases.</p>
                                 </div>
-                                <a class="btn ghost sm" href="plugins.html">View all</a>
+                                <a class="btn ghost sm" href="{{ route('customer.plugins') }}">View all</a>
                             </div>
                             <div class="list" id="recent">
                                 <div class="row-i">
@@ -398,7 +266,7 @@
                                     <h2>Latest updates</h2>
                                     <p>News about your plugins.</p>
                                 </div>
-                                <a class="btn ghost sm" href="updates.html">View all</a>
+                                <a class="btn ghost sm" href="{{ route('customer.updates') }}">View all</a>
                             </div>
                             <div class="list">
                                 <div class="row-i">
@@ -440,37 +308,37 @@
                                 <h2>Recommended for you</h2>
                                 <p>Plugins you don't have yet.</p>
                             </div>
-                            <a class="btn ghost sm" href="../index.html#shop">Visit the shop</a>
+                            <a class="btn ghost sm" href="{{ route('home') }}#shop">Visit the shop</a>
                         </div>
                         <div class="ptiles" id="recs">
                             <article class="ptile">
-                                <a class="pc" href="../plugin.html"
+                                <a class="pc" href="{{ route('home') }}#shop"
                                     ><img alt="" src="../assets/images/plugins/smear-frames.png"
                                 /></a>
                                 <div class="pb">
                                     <h3>Smear Frames</h3>
                                     <span class="meta">Script · $19</span>
-                                    <div class="pa"><a class="btn sm ghost" href="../plugin.html">View plugin</a></div>
+                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
                                 </div>
                             </article>
                             <article class="ptile">
-                                <a class="pc" href="../plugin.html"
+                                <a class="pc" href="{{ route('home') }}#shop"
                                     ><img alt="" src="../assets/images/plugins/line-boil-fx.png"
                                 /></a>
                                 <div class="pb">
                                     <h3>Line Boil FX</h3>
                                     <span class="meta">Plugin · $15</span>
-                                    <div class="pa"><a class="btn sm ghost" href="../plugin.html">View plugin</a></div>
+                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
                                 </div>
                             </article>
                             <article class="ptile">
-                                <a class="pc" href="../plugin.html"
+                                <a class="pc" href="{{ route('home') }}#shop"
                                     ><img alt="" src="../assets/images/plugins/toon-shadows.png"
                                 /></a>
                                 <div class="pb">
                                     <h3>Toon Shadows</h3>
                                     <span class="meta">Plugin · $24</span>
-                                    <div class="pa"><a class="btn sm ghost" href="../plugin.html">View plugin</a></div>
+                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
                                 </div>
                             </article>
                         </div>

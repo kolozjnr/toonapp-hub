@@ -36,6 +36,13 @@ test('an admin can open the create and edit forms', function () {
         ->assertSee('Toon Shadows');
 });
 
+test('the plugin form includes the client-side image size guard', function () {
+    $this->actingAs(pluginAdmin())
+        ->get(route('admin.plugins.create'))
+        ->assertOk()
+        ->assertSee('larger than 4 MB');
+});
+
 test('global flash displays errors and success messages', function () {
     $admin = pluginAdmin();
 
@@ -182,4 +189,98 @@ test('duplicate plugin names receive unique slugs', function () {
     $second = Plugin::create(['name' => 'Toon Shadows', 'price' => 10, 'category' => 'Plugin']);
 
     expect($second->slug)->toBe('toon-shadows-2');
+});
+
+test('the plugin list is loaded from the database', function () {
+    $plugin = Plugin::create([
+        'name' => 'Database Only Plugin',
+        'price' => 19,
+        'category' => 'Plugin',
+        'is_live' => true,
+    ]);
+
+    $this->actingAs(pluginAdmin())
+        ->get(route('admin.plugins'))
+        ->assertOk()
+        ->assertSee('Database Only Plugin')
+        ->assertSee('1 plugin · 1 live')
+        ->assertSee(route('admin.plugins.show', $plugin), false)
+        ->assertSee(route('admin.plugins.edit', $plugin), false)
+        ->assertSee(route('admin.plugins.toggle', $plugin), false)
+        ->assertSee(route('admin.plugins.destroy', $plugin), false)
+        ->assertDontSee('Smear Frames')
+        ->assertDontSee('Squash &amp; Stretch Pro', false);
+});
+
+test('the plugin list can be searched', function () {
+    Plugin::create(['name' => 'Alpha Plugin', 'price' => 10, 'category' => 'Plugin']);
+    Plugin::create(['name' => 'Beta Plugin', 'price' => 20, 'category' => 'Script']);
+
+    $this->actingAs(pluginAdmin())
+        ->get(route('admin.plugins', ['q' => 'Alpha']))
+        ->assertOk()
+        ->assertSee('Alpha Plugin')
+        ->assertDontSee('Beta Plugin');
+});
+
+test('an admin can view a plugin', function () {
+    $plugin = Plugin::create([
+        'name' => 'Toon Shadows',
+        'tagline' => 'Soft shadows in one click.',
+        'price' => 24,
+        'category' => 'Plugin',
+    ]);
+
+    $this->actingAs(pluginAdmin())
+        ->get(route('admin.plugins.show', $plugin))
+        ->assertOk()
+        ->assertSee('Toon Shadows')
+        ->assertSee('Soft shadows in one click.')
+        ->assertSee(route('admin.plugins.edit', $plugin), false);
+});
+
+test('an admin can hide and show a plugin', function () {
+    $admin = pluginAdmin();
+    $plugin = Plugin::create([
+        'name' => 'Bounce Presets',
+        'price' => 0,
+        'category' => 'Preset pack',
+        'is_live' => true,
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.plugins.toggle', $plugin))
+        ->assertRedirect();
+
+    expect($plugin->refresh()->is_live)->toBeFalse();
+
+    $this->actingAs($admin)
+        ->patch(route('admin.plugins.toggle', $plugin))
+        ->assertRedirect();
+
+    expect($plugin->refresh()->is_live)->toBeTrue();
+});
+
+test('an admin can delete a plugin and its artwork', function () {
+    Storage::fake('public');
+
+    $cover = UploadedFile::fake()->image('cover.png')->store('plugins/covers', 'public');
+    $shot = UploadedFile::fake()->image('shot.png')->store('plugins/gallery', 'public');
+
+    $plugin = Plugin::create([
+        'name' => 'Temporary Plugin',
+        'price' => 5,
+        'category' => 'Plugin',
+        'cover_image' => $cover,
+        'gallery' => [['path' => $shot, 'title' => 'Shot', 'text' => '']],
+    ]);
+
+    $this->actingAs(pluginAdmin())
+        ->delete(route('admin.plugins.destroy', $plugin))
+        ->assertRedirect(route('admin.plugins'));
+
+    expect(Plugin::find($plugin->id))->toBeNull();
+
+    Storage::disk('public')->assertMissing($cover);
+    Storage::disk('public')->assertMissing($shot);
 });

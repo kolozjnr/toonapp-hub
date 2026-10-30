@@ -30,7 +30,7 @@
                         <div class="sub">How your store is doing.</div>
                     </div>
                     <div class="top-right">
-                        <a class="btn ghost sm store-link" href="../index.html"
+                        <a class="btn ghost sm store-link" href="{{ route('home') }}"
                             ><svg
                                 fill="none"
                                 height="18"
@@ -47,7 +47,7 @@
                         >
                         <div class="who">
                             <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            ><span class="tx"><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span>
                         </div>
                     </div>
                 </header>
@@ -104,7 +104,7 @@
                                 <p>7 orders so far and 6 plugins on your shelf. Keep them coming!</p>
                             </div>
                         </div>
-                        <a class="btn white" href="upload-plugin.html"
+                        <a class="btn white" href="{{route('admin.plugins.create')}}"
                             ><svg
                                 fill="none"
                                 height="18"
@@ -135,7 +135,7 @@
                         </svg>
                         <div>
                             <b>2 unread messages</b>Customers are waiting for a reply.
-                            <a href="messages.html">Open messages</a>
+                            <a href="{{ route('admin.messages') }}">Open messages</a>
                         </div>
                     </div>
                     <section class="kpis">
@@ -308,7 +308,7 @@
                                     <h2>Sales by plugin</h2>
                                     <p>Revenue per plugin, all time.</p>
                                 </div>
-                                <a class="btn ghost sm" href="plugins.html">All plugins</a>
+                                <a class="btn ghost sm" href="{{ route('admin.plugins') }}">All plugins</a>
                             </div>
                             <div class="bars">
                                 <div class="barrow">
@@ -349,7 +349,7 @@
                                     <h2>Latest orders</h2>
                                     <p>Most recent purchases.</p>
                                 </div>
-                                <a class="btn ghost sm" href="orders.html">All orders</a>
+                                <a class="btn ghost sm" href="{{ route('admin.orders') }}">All orders</a>
                             </div>
                             <div class="list">
                                 <div class="row-i">
@@ -383,7 +383,7 @@
                                     <h2>Latest reviews</h2>
                                     <p>What customers are saying.</p>
                                 </div>
-                                <a class="btn ghost sm" href="reviews.html">All reviews</a>
+                                <a class="btn ghost sm" href="{{ route('admin.reviews') }}">All reviews</a>
                             </div>
                             <div class="list">
                                 <div class="row-i">
@@ -433,7 +433,7 @@
                                 1.0 GB of 10 GB used (10%). Cover and extra images take the most space.
                             </div>
                             <div class="savebar mt-14">
-                                <a class="btn ghost sm" href="settings.html#backup"
+                                <a class="btn ghost sm" href="{{ route('admin.settings') }}#backup"
                                     ><svg
                                         fill="none"
                                         height="18"

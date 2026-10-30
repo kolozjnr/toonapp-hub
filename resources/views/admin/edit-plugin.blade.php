@@ -30,7 +30,7 @@
                         <div class="sub">Squash &amp; Stretch Pro</div>
                     </div>
                     <div class="top-right">
-                        <a class="btn ghost sm store-link" href="../index.html"
+                        <a class="btn ghost sm store-link" href="{{ route('home') }}"
                             ><svg
                                 fill="none"
                                 height="18"
@@ -354,7 +354,7 @@ The layer keeps its volume as it squashes, so the motion reads as cartoony inste
                                     >
                                     <span class="err" hidden="" id="pErr"></span>
                                     <button class="btn" id="saveBtn">Save changes</button>
-                                    <a class="btn ghost" href="../plugin.html">View in store</a
+                                    <a class="btn ghost" href="{{ route('home') }}#shop">View in store</a
                                     ><button class="btn danger ghost" id="delBtn" type="button">Delete plugin</button>
                                 </div>
                             </section>

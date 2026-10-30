@@ -26,8 +26,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('plugins', [AdminPluginController::class, 'index'])->name('plugins');
         Route::get('plugins/create', [AdminPluginController::class, 'create'])->name('plugins.create');
         Route::post('plugins', [AdminPluginController::class, 'store'])->name('plugins.store');
+        Route::get('plugins/{plugin}', [AdminPluginController::class, 'show'])->name('plugins.show');
         Route::get('plugins/{plugin}/edit', [AdminPluginController::class, 'edit'])->name('plugins.edit');
         Route::put('plugins/{plugin}', [AdminPluginController::class, 'update'])->name('plugins.update');
+        Route::patch('plugins/{plugin}/visibility', [AdminPluginController::class, 'toggle'])->name('plugins.toggle');
+        Route::delete('plugins/{plugin}', [AdminPluginController::class, 'destroy'])->name('plugins.destroy');
         Route::get('orders', function () {
             return view('admin.orders');
         })->name('orders');

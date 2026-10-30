@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PluginRequest;
 use App\Models\Plugin;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
@@ -21,10 +22,27 @@ class PluginController extends Controller
     /**
      * Show the plugin list.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('q'));
+
+        $plugins = Plugin::query()
+            ->with('creator')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('category', 'like', "%{$search}%")
+                        ->orWhere('tagline', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
         return view('admin.plugins', [
-            'plugins' => Plugin::query()->with('creator')->latest()->paginate(15),
+            'plugins' => $plugins,
+            'totalPlugins' => Plugin::query()->count(),
+            'livePlugins' => Plugin::query()->live()->count(),
         ]);
     }
 
@@ -48,6 +66,47 @@ class PluginController extends Controller
         return redirect()
             ->route('admin.plugins.edit', $plugin)
             ->with('success', 'Plugin created successfully.');
+    }
+
+    /**
+     * Show a single plugin.
+     */
+    public function show(Plugin $plugin): View
+    {
+        return view('admin.plugins.show', [
+            'plugin' => $plugin->load('creator'),
+        ]);
+    }
+
+    /**
+     * Toggle whether a plugin is visible in the store.
+     */
+    public function toggle(Plugin $plugin): RedirectResponse
+    {
+        $plugin->update(['is_live' => ! $plugin->is_live]);
+
+        return back()->with(
+            'success',
+            $plugin->is_live ? 'Plugin is live in the store.' : 'Plugin hidden from customers.'
+        );
+    }
+
+    /**
+     * Delete a plugin and its artwork.
+     */
+    public function destroy(Plugin $plugin): RedirectResponse
+    {
+        $this->deleteImage($plugin->cover_image);
+
+        foreach ($plugin->gallery ?? [] as $image) {
+            $this->deleteImage($image['path'] ?? null);
+        }
+
+        $plugin->delete();
+
+        return redirect()
+            ->route('admin.plugins')
+            ->with('success', 'Plugin deleted.');
     }
 
     /**

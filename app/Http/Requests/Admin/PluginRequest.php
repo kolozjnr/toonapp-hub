@@ -60,10 +60,10 @@ class PluginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'cover.uploaded' => 'The cover image could not be uploaded. Check that it is smaller than the server limit and try again.',
+            'cover.uploaded' => 'The cover image could not be uploaded. Choose an image smaller than 4 MB and try again.',
             'cover.image' => 'The cover must be a valid image (JPG, PNG, WebP or GIF).',
             'cover.max' => 'The cover image must be 4 MB or smaller.',
-            'images.*.uploaded' => 'A gallery image could not be uploaded. Check its size and try again.',
+            'images.*.uploaded' => 'A gallery image could not be uploaded. Choose an image smaller than 4 MB and try again.',
             'images.*.image' => 'Every gallery file must be a valid image (JPG, PNG, WebP or GIF).',
             'images.*.max' => 'Each gallery image must be 4 MB or smaller.',
             'image_titles.*.max' => 'Each image title must be 60 characters or fewer.',

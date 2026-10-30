@@ -30,7 +30,7 @@
                         <div class="sub">Send updates to your customers.</div>
                     </div>
                     <div class="top-right">
-                        <a class="btn ghost sm store-link" href="../index.html"
+                        <a class="btn ghost sm store-link" href="{{ route('home') }}"
                             ><svg
                                 fill="none"
                                 height="18"

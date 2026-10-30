@@ -6,7 +6,7 @@
 
 <x-app-layout>
     <div class="app">
-        @include('admin.partials.sidebar')
+        @include('layouts.admin-nav')
 
         <div class="app-main">
             <header class="top">
@@ -378,25 +378,25 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                var maxBytes = 4 * 1024 * 1024;
+        @push('scripts')
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var maxBytes = 4 * 1024 * 1024;
 
-                document.querySelectorAll("[data-plugin-image]").forEach(function (input) {
-                    input.addEventListener("change", function () {
-                        var file = input.files && input.files[0];
+                    document.querySelectorAll("[data-plugin-image]").forEach(function (input) {
+                        input.addEventListener("change", function () {
+                            var file = input.files && input.files[0];
 
-                        if (!file || file.size <= maxBytes) return;
+                            if (!file || file.size <= maxBytes) return;
 
-                        input.value = "";
+                            input.value = "";
 
-                        if (window.Toon && typeof window.Toon.toast === "function") {
-                            window.Toon.toast(file.name + " is larger than 4 MB. Choose a smaller image.");
-                        }
+                            if (window.Toon && typeof window.Toon.toast === "function") {
+                                window.Toon.toast(file.name + " is larger than 4 MB. Choose a smaller image.");
+                            }
+                        });
                     });
                 });
-            });
-        </script>
-    @endpush
-</x-app-layout>
+            </script>
+        @endpush
+    </x-app-layout>
