@@ -95,8 +95,15 @@
                         <path d="M5 12.5V20h14v-7.5"></path></svg
                     >Back to store</a
                 >
-                <a class="nav-i out" href="../login.html"
-                    ><svg
+                  <form class="nav-i out" href="route('logout')" method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                    <svg
                         fill="none"
                         height="18"
                         stroke="currentColor"
@@ -109,6 +116,23 @@
                         <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"></path></svg
                     >Log out</a
                 >
+                </form>
+                {{-- <a class="nav-i out" href="route('logout')"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();"
+                    ><svg
+                        fill="none"
+                        height="18"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="18"
+                    >
+                        <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"></path></svg
+                    >Log out</a
+                > --}}
             </nav>
             <div class="app-main">
                 <header class="top">
@@ -156,7 +180,7 @@
                         >
                         <div class="who">
                             <span class="av">AO</span
-                            ><span class="tx"><b>Ada Okafor</b><small>ada@example.com</small></span>
+                            ><span class="tx"><b>{{ Auth::user()->name }}</b><small> {{ Auth::user()->email }} </small></span>
                         </div>
                     </div>
                 </header>

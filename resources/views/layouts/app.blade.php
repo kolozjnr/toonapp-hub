@@ -32,6 +32,8 @@
         @stack('scripts-head')
     </head>
     <body>
+        @include('partials.flash')
+
          {{-- @attributes($attributes->merge(['class' => 'font-sans antialiased'])) --}}
         {{-- <div class="min-h-screen bg-gray-100"> --}}
             {{-- @include('layouts.navigation') --}}

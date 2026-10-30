@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
@@ -26,7 +26,7 @@ class DashboardController extends Controller
     /**
      * Show the store dashboard (admin panel).
      */
-    public function admin(): \Illuminate\View\View
+    public function admin(): View
     {
         $users = User::latest()->take(10)->get();
 
@@ -36,7 +36,7 @@ class DashboardController extends Controller
     /**
      * Show the customer dashboard.
      */
-    public function customer(): \Illuminate\View\View
+    public function customer(): View
     {
         $user = Auth::user();
 

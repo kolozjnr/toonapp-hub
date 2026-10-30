@@ -1,18 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ToonApp Hub</title>
-<meta name="description" content="Premium plugins, scripts and presets for animators and video editors.">
-<link rel="icon" type="image/png" href="assets/img/logo.png">
-<link rel="apple-touch-icon" href="assets/img/logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/css/shop.css">
-</head>
-<body data-root="" data-page="home">
+<x-guest-layout>
+{{-- <body data-root="" data-page="home"> --}}
 <main class="wrap">
   <section class="hero">
     <div>
@@ -48,10 +35,6 @@
     <details><summary>What if it doesn't work for me?</summary><p>Send us a message from the Contact page and we'll help you get it working.</p></details>
   </section>
 </main>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/core.js"></script>
-<script src="assets/js/public.js"></script>
-<script src="assets/js/toony.js"></script>
-<script src="assets/js/pages/home.js"></script>
-</body>
-</html>
+
+</x-guest-layout>
+

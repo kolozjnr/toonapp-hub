@@ -1,15 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Admin\PluginController as AdminPluginController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -31,9 +23,11 @@ Route::middleware(['auth'])->group(function () {
     // Admin area — only superadmin + admin
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', [AdminDashboardController::class, 'show'])->name('dashboard');
-        Route::get('plugins', function () {
-            return view('admin.plugins');
-        })->name('plugins');
+        Route::get('plugins', [AdminPluginController::class, 'index'])->name('plugins');
+        Route::get('plugins/create', [AdminPluginController::class, 'create'])->name('plugins.create');
+        Route::post('plugins', [AdminPluginController::class, 'store'])->name('plugins.store');
+        Route::get('plugins/{plugin}/edit', [AdminPluginController::class, 'edit'])->name('plugins.edit');
+        Route::put('plugins/{plugin}', [AdminPluginController::class, 'update'])->name('plugins.update');
         Route::get('orders', function () {
             return view('admin.orders');
         })->name('orders');
@@ -52,9 +46,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('settings', function () {
             return view('admin.settings');
         })->name('settings');
-        Route::get('upload-plugin', function () {
-            return view('admin.upload-plugin');
-        })->name('upload-plugin');
+        Route::get('upload-plugin', fn () => redirect()->route('admin.plugins.create'))->name('upload-plugin');
     });
 
     // Customer area — only users with the "user" role

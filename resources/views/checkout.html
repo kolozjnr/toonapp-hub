@@ -1,29 +1,389 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Checkout · ToonApp Hub</title>
-<meta name="description" content="Complete your order.">
-<link rel="icon" type="image/png" href="assets/img/logo.png">
-<link rel="apple-touch-icon" href="assets/img/logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@500;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/css/shop.css">
-</head>
-<body data-root="" data-page="checkout">
-<main class="wrap page-pad">
-  <div class="contact-head" style="padding-block:10px 18px">
-    <a class="btn sm white" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Keep shopping</a>
-    <h1 id="coTitle">Checkout</h1>
-  </div>
-  <div id="checkout"></div>
-</main>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/core.js"></script>
-<script src="assets/js/public.js"></script>
-<script src="assets/js/toony.js"></script>
-<script src="assets/js/pages/checkout.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Checkout · ToonApp Hub</title>
+        <meta name="description" content="Complete your order." />
+        <link rel="icon" type="image/png" href="assets/images/logo.png" />
+        <link rel="apple-touch-icon" href="assets/images/logo.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@500;600;700;800;900&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap"
+        />
+        <link rel="stylesheet" href="assets/css/style.css" />
+        <link rel="stylesheet" href="assets/css/components.css" />
+    </head>
+    <body>
+        <header class="bar">
+            <div class="wrap">
+                <div class="bar-in">
+                    <a aria-label="ToonApp Hub home" class="logo" href="index.html"
+                        ><img alt="" class="logo-ic" height="40" src="assets/images/logo.png" width="40" /><span
+                            >ToonApp <b class="hub">Hub</b></span
+                        ></a
+                    >
+                    <nav aria-label="Main" class="nav">
+                        <a href="index.html#shop">Plugins</a><a href="index.html#how">How it works</a
+                        ><a href="index.html#faq">FAQ</a>
+                        <a data-goto="contact" href="contact.html">Contact</a>
+                    </nav>
+                    <div class="bar-right">
+                        <a aria-label="Updates" class="btn sm white icon-btn" href="customer/updates.html"
+                            ><svg
+                                fill="none"
+                                height="18"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.6"
+                                viewBox="0 0 24 24"
+                                width="18"
+                            >
+                                <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path>
+                                <path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg
+                            ><span class="cart-n dot">2</span></a
+                        >
+                        <a
+                            class="btn sm white"
+                            data-first="Ada"
+                            href="customer/dashboard.html"
+                            id="userBtn"
+                            title="Open my dashboard"
+                            ><span class="avatar">AO</span><span class="hide-sm">Ada</span></a
+                        >
+                        <button aria-label="Open cart" class="btn sm" id="cartBtn" type="button">
+                            <svg
+                                fill="none"
+                                height="18"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.6"
+                                viewBox="0 0 24 24"
+                                width="18"
+                            >
+                                <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"></path>
+                                <circle cx="10" cy="20.5" r="1.3"></circle>
+                                <circle cx="18" cy="20.5" r="1.3"></circle></svg
+                            ><span class="cart-n">2</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="wrap page-pad">
+            <div class="contact-head head-compact">
+                <a class="btn sm white" href="index.html"
+                    ><svg
+                        fill="none"
+                        height="16"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="3"
+                        viewBox="0 0 24 24"
+                        width="16"
+                    >
+                        <path d="M15 5l-7 7 7 7"></path></svg
+                    >Keep shopping</a
+                >
+                <h1 id="coTitle">Checkout</h1>
+            </div>
+            <div id="checkout">
+                <div class="co">
+                    <section class="panel2">
+                        <h3>Payment</h3>
+                        <form action="checkout-success.html" class="form" id="payForm" method="post" novalidate="">
+                            <div class="mini">
+                                <span><b>Ada Okafor</b><small>ada@example.com · Nigeria</small></span>
+                            </div>
+                            <div class="field">
+                                <label for="pName">Name on card</label
+                                ><input autocomplete="cc-name" id="pName" name="card_name" value="Ada Okafor" />
+                            </div>
+                            <div class="field">
+                                <label for="pCard">Card number</label
+                                ><input
+                                    autocomplete="cc-number"
+                                    id="pCard"
+                                    inputmode="numeric"
+                                    maxlength="19"
+                                    name="card_number"
+                                    placeholder="4242 4242 4242 4242"
+                                />
+                            </div>
+                            <div class="two">
+                                <div class="field">
+                                    <label for="pExp">Expiry</label
+                                    ><input
+                                        autocomplete="cc-exp"
+                                        id="pExp"
+                                        maxlength="5"
+                                        name="card_expiry"
+                                        placeholder="MM/YY"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label for="pCvc">CVC</label
+                                    ><input
+                                        autocomplete="cc-csc"
+                                        id="pCvc"
+                                        inputmode="numeric"
+                                        maxlength="4"
+                                        name="card_cvc"
+                                        placeholder="123"
+                                    />
+                                </div>
+                            </div>
+                            <span class="err" hidden="" id="payErr"></span>
+                            <button class="btn pink" id="payBtn">Pay $34</button>
+                            <span class="note">Download links are emailed to ada@example.com after payment.</span>
+                        </form>
+                    </section>
+                    <aside class="co-sum panel2">
+                        <h3>Order summary</h3>
+                        <div class="co-list" id="coList">
+                            <div class="li" data-price="19">
+                                <div class="th"><img alt="" src="assets/images/plugins/smear-frames.png" /></div>
+                                <div class="min-w-0">
+                                    <b>Smear Frames</b><small>Script</small><br /><button
+                                        class="link"
+                                        data-rm="smear"
+                                        type="button"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                                <span class="p">$19</span>
+                            </div>
+                            <div class="li" data-price="15">
+                                <div class="th"><img alt="" src="assets/images/plugins/line-boil-fx.png" /></div>
+                                <div class="min-w-0">
+                                    <b>Line Boil FX</b><small>Plugin</small><br /><button
+                                        class="link"
+                                        data-rm="boil"
+                                        type="button"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                                <span class="p">$15</span>
+                            </div>
+                        </div>
+                        <div class="row total"><span>Total</span><span id="coTotal">$34</span></div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+        <footer class="site-foot">
+            <div class="wrap foot-in">
+                <span>© 2026 ToonApp Hub</span><span><a href="contact.html">Contact us</a> · Made for animators</span>
+            </div>
+        </footer>
+        <div class="scrim" id="cartScrim"></div>
+        <aside aria-label="Cart" class="drawer" id="cartDrawer">
+            <div class="dh">
+                <h3>Your cart</h3>
+                <button aria-label="Close" class="x" data-close="" type="button">×</button>
+            </div>
+            <div class="dbody" id="cartBody">
+                <div class="li" data-cart-item="smear" data-price="19">
+                    <a class="th" href="plugin.html"><img alt="" src="assets/images/plugins/smear-frames.png" /></a>
+                    <div class="min-w-0">
+                        <b>Smear Frames</b><small>Script</small><br /><button
+                            class="link"
+                            data-rm="smear"
+                            type="button"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                    <span class="p">$19</span>
+                </div>
+                <div class="li" data-cart-item="boil" data-price="15">
+                    <a class="th" href="plugin.html"><img alt="" src="assets/images/plugins/line-boil-fx.png" /></a>
+                    <div class="min-w-0">
+                        <b>Line Boil FX</b><small>Plugin</small><br /><button class="link" data-rm="boil" type="button">
+                            Remove
+                        </button>
+                    </div>
+                    <span class="p">$15</span>
+                </div>
+                <div class="empty flat" hidden="" id="cartEmpty">
+                    <h3>Cart's empty</h3>
+                    <p>Add a plugin and it'll wait here for you.</p>
+                </div>
+            </div>
+            <div class="dfoot" id="cartFoot">
+                <div class="row total"><span>Total</span><span id="cartTotal">$34</span></div>
+                <a class="btn pink" href="checkout.html" id="toCheckout">Checkout</a>
+                <span class="note text-center">One-time payment · Instant download</span>
+            </div>
+            <div class="dfoot" hidden="" id="cartFootEmpty">
+                <a class="btn" data-close="" href="index.html#shop">Browse plugins</a>
+            </div>
+        </aside>
+        <template id="cartItemTemplate"
+            ><div class="li" data-cart-item="" data-price="">
+                <a class="th" href=""><img alt="" src="" /></a>
+                <div class="min-w-0">
+                    <b></b><small></small><br /><button class="link" data-rm="" type="button">Remove</button>
+                </div>
+                <span class="p"></span></div
+        ></template>
+        <div aria-hidden="true" class="buddy off" id="buddy">
+            <div class="buddy-bubble hide"></div>
+            <svg aria-hidden="true" class="toon" viewBox="0 0 360 370">
+                <ellipse class="shadow" cx="180" cy="345" fill="rgba(27,21,48,.22)" rx="92" ry="14"></ellipse>
+                <g class="bob">
+                    <path
+                        d="M268 250 C 320 250, 330 300, 300 318 S 250 340, 270 360"
+                        fill="none"
+                        stroke="#1B1530"
+                        stroke-linecap="round"
+                        stroke-width="6"
+                    ></path>
+                    <rect
+                        fill="#FFD23F"
+                        height="40"
+                        rx="10"
+                        stroke="#1B1530"
+                        stroke-width="5"
+                        width="44"
+                        x="246"
+                        y="222"
+                    ></rect>
+                    <rect fill="#1B1530" height="20" rx="3" width="8" x="254" y="206"></rect>
+                    <rect fill="#1B1530" height="20" rx="3" width="8" x="274" y="206"></rect>
+                    <path
+                        d="M60 250 C 60 130, 115 60, 180 60 S 300 130, 300 250 C 300 310, 250 335, 180 335 S 60 310, 60 250 Z"
+                        fill="#7B5CFF"
+                        stroke="#1B1530"
+                        stroke-width="6"
+                    ></path>
+                    <path
+                        d="M95 150 C 110 110, 140 92, 165 88"
+                        fill="none"
+                        stroke="#fff"
+                        stroke-linecap="round"
+                        stroke-opacity=".55"
+                        stroke-width="10"
+                    ></path>
+                    <ellipse
+                        class="eye"
+                        cx="135"
+                        cy="190"
+                        fill="#fff"
+                        rx="30"
+                        ry="34"
+                        stroke="#1B1530"
+                        stroke-width="5"
+                    ></ellipse>
+                    <ellipse
+                        class="eye"
+                        cx="225"
+                        cy="190"
+                        fill="#fff"
+                        rx="30"
+                        ry="34"
+                        stroke="#1B1530"
+                        stroke-width="5"
+                    ></ellipse>
+                    <g class="laugh-eyes" fill="none" stroke="#1B1530" stroke-linecap="round" stroke-width="8">
+                        <path d="M108 198 Q135 168 162 198"></path>
+                        <path d="M198 198 Q225 168 252 198"></path>
+                    </g>
+                    <g class="tears" fill="#7FD3FF" stroke="#1B1530" stroke-width="3">
+                        <path class="tear" d="M100 206 q-7 12 0 16 q7 -4 0 -16z"></path>
+                        <path class="tear tear-late" d="M260 206 q-7 12 0 16 q7 -4 0 -16z"></path>
+                    </g>
+                    <circle class="pupil" cx="135" cy="194" data-cx="135" data-cy="194" fill="#1B1530" r="13"></circle>
+                    <circle class="pupil" cx="225" cy="194" data-cx="225" data-cy="194" fill="#1B1530" r="13"></circle>
+                    <ellipse cx="102" cy="240" fill="#FF5C8A" opacity=".8" rx="16" ry="9"></ellipse>
+                    <ellipse cx="258" cy="240" fill="#FF5C8A" opacity=".8" rx="16" ry="9"></ellipse>
+                    <path
+                        class="mouth"
+                        d="M150 248 Q180 280 210 248"
+                        fill="#FF5C8A"
+                        stroke="#1B1530"
+                        stroke-linejoin="round"
+                        stroke-width="6"
+                    ></path>
+                    <path
+                        d="M250 255 C 268 250, 270 240, 262 236"
+                        fill="none"
+                        stroke="#1B1530"
+                        stroke-linecap="round"
+                        stroke-width="6"
+                    ></path>
+                </g>
+            </svg>
+        </div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <script src="assets/js/ui.js"></script>
+        <script src="assets/js/store.js"></script>
+        <script src="assets/js/toony.js"></script>
+        <script>
+            /* Checkout: remove items, format card fields, check them, then go to the thank-you page. */
+            (function () {
+                "use strict";
+                var form = document.getElementById("payForm");
+                var list = document.getElementById("coList");
+                var btn = document.getElementById("payBtn");
+                var err = document.getElementById("payErr");
+
+                function total() {
+                    return Toon.$$("[data-price]", list).reduce(function (s, row) {
+                        return s + (parseFloat(row.dataset.price) || 0);
+                    }, 0);
+                }
+                function refresh() {
+                    var t = total();
+                    document.getElementById("coTotal").textContent = Toon.money(t);
+                    btn.textContent = t ? "Pay " + Toon.money(t) : "Get my plugins";
+                    if (!list.querySelector("[data-price]")) location.assign("index.html#shop");
+                }
+
+                list.addEventListener("click", function (e) {
+                    var rm = e.target.closest("[data-rm]");
+                    if (!rm) return;
+                    rm.closest(".li").remove();
+                    refresh();
+                });
+
+                var card = document.getElementById("pCard");
+                card.addEventListener("input", function () {
+                    card.value = card.value
+                        .replace(/\D/g, "")
+                        .slice(0, 16)
+                        .replace(/(.{4})/g, "$1 ")
+                        .trim();
+                });
+                var exp = document.getElementById("pExp");
+                exp.addEventListener("input", function () {
+                    var v = exp.value.replace(/\D/g, "").slice(0, 4);
+                    exp.value = v.length > 2 ? v.slice(0, 2) + "/" + v.slice(2) : v;
+                });
+
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    var msg = "";
+                    if (!total()) msg = "";
+                    else if (card.value.replace(/\s/g, "").length < 15) msg = "That card number looks too short.";
+                    else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp.value)) msg = "Expiry should look like 08/28.";
+                    else if (!/^\d{3,4}$/.test(document.getElementById("pCvc").value))
+                        msg = "CVC is the 3 or 4 digits on the back of the card.";
+                    Toon.showErr(err, msg);
+                    if (msg) return;
+                    btn.disabled = true;
+                    btn.textContent = "Processing…";
+                    // DEMO: in Laravel this form posts to your payment route instead.
+                    location.assign(form.getAttribute("action"));
+                });
+            })();
+        </script>
+    </body>
 </html>
