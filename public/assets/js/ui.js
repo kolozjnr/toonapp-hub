@@ -9,24 +9,17 @@
 
     var Toon = (window.Toon = window.Toon || {});
 
-    /* The store now loads plugins from the database. Remove the demo listings
-       that older versions of this app seeded into localStorage. */
+    /* The store now loads plugins from the database. Retire the product
+       records that older versions of this app kept in localStorage so they
+       can never be shown again. */
     try {
         var key = "toonhub.db.v1";
         var raw = localStorage.getItem(key);
         var data = raw ? JSON.parse(raw) : null;
 
-        if (data && data.products) {
-            var changed = false;
-
-            ["example-1", "example-2"].forEach(function (id) {
-                if (Object.prototype.hasOwnProperty.call(data.products, id)) {
-                    delete data.products[id];
-                    changed = true;
-                }
-            });
-
-            if (changed) localStorage.setItem(key, JSON.stringify(data));
+        if (data && data.products && Object.keys(data.products).length) {
+            delete data.products;
+            localStorage.setItem(key, JSON.stringify(data));
         }
     } catch (e) {}
 

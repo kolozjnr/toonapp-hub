@@ -115,6 +115,88 @@ class Plugin extends Model
     }
 
     /**
+     * The public URL for the uploaded cover image, if there is one.
+     */
+    public function coverUrl(): ?string
+    {
+        return $this->cover_image ? asset('storage/'.$this->cover_image) : null;
+    }
+
+    /**
+     * The host application tags stored on the plugin.
+     *
+     * @return list<array{code: string, name: string}>
+     */
+    public function hostTags(): array
+    {
+        return collect($this->hosts ?? [])
+            ->filter(fn ($code) => is_string($code) && isset(self::HOSTS[$code]))
+            ->map(fn (string $code) => ['code' => $code, 'name' => self::HOSTS[$code]])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * The price formatted for the store shelf.
+     */
+    public function priceLabel(): string
+    {
+        return $this->formatMoney((float) $this->price) ?? 'Free';
+    }
+
+    /**
+     * The old price formatted for the store shelf, when the plugin is on sale.
+     */
+    public function oldPriceLabel(): ?string
+    {
+        $old = $this->old_price !== null ? (float) $this->old_price : 0;
+
+        return $old > (float) $this->price ? $this->formatMoney($old) : null;
+    }
+
+    /**
+     * The badge shown on the card, defaulting to "Free" for free plugins.
+     */
+    public function badgeLabel(): ?string
+    {
+        return $this->badge ?: ((float) $this->price <= 0 ? 'Free' : null);
+    }
+
+    /**
+     * Two initials used when a plugin has no cover image.
+     */
+    public function initials(): string
+    {
+        return Str::of($this->name)
+            ->squish()
+            ->explode(' ')
+            ->filter()
+            ->take(2)
+            ->map(fn (string $word) => Str::upper(Str::substr($word, 0, 1)))
+            ->implode('');
+    }
+
+    /**
+     * A stable hue for the generated cover placeholder.
+     */
+    public function coverHue(): int
+    {
+        return abs(crc32($this->name)) % 360;
+    }
+
+    /**
+     * Format a price without unnecessary trailing zeroes.
+     */
+    private function formatMoney(float $amount): ?string
+    {
+        if ($amount <= 0) {
+            return null;
+        }
+
+        return '$'.number_format($amount, fmod($amount, 1.0) > 0 ? 2 : 0);
+    }
+
+    /**
      * The administrator who uploaded the plugin.
      */
     public function creator(): BelongsTo

@@ -5,13 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Toonapp') }}</title>
+        <title>{{ $title ? $title.' · '.config('app.name', 'Toonapp') : config('app.name', 'Toonapp') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-          <meta name="description" content="Premium plugins, scripts and presets for animators and video editors." />
+        <meta name="description" content="{{ $description ?? 'Premium plugins, scripts and presets for animators and video editors.' }}" />
         <link rel="icon" type="image/png" href="{{ asset('assets/images/logo.png') }}" />
         <link rel="apple-touch-icon" href="{{ asset('assets/images/logo.png') }}" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,20 +29,20 @@
         <header class="bar">
             <div class="wrap">
                 <div class="bar-in">
-                    <a aria-label="ToonApp Hub home" class="logo" href="index.html"
-                        ><img alt="" class="logo-ic" height="40" src="assets/images/logo.png" width="40" /><span
+                    <a aria-label="ToonApp Hub home" class="logo" href="{{ route('home') }}"
+                        ><img alt="" class="logo-ic" height="40" src="{{ asset('assets/images/logo.png') }}" width="40" /><span
                             >ToonApp <b class="hub">Hub</b></span
                         ></a
                     >
                     <nav aria-label="Main" class="nav">
-                        <a href="index.html#shop">Plugins</a><a href="index.html#how">How it works</a
-                        ><a href="index.html#faq">FAQ</a>
-                        <a data-goto="contact" href="contact.html">Contact</a>
+                        <a href="{{ route('home') }}#shop">Plugins</a><a href="{{ route('home') }}#how">How it works</a
+                        ><a href="{{ route('home') }}#faq">FAQ</a>
+                        <a data-goto="contact" href="{{ route('contact') }}">Contact</a>
                     </nav>
                     <div class="bar-right">
                         <!-- Logged-out visitor (shown in this template). --><a
                             class="btn sm white"
-                            href="login.html"
+                            href="{{ route('login') }}"
                             id="loginLink"
                             ><svg
                                 fill="none"
@@ -56,7 +56,7 @@
                                 <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg
                             ><span class="hide-sm">Log in</span></a
                         >
-                        <a class="btn sm pink hide-xs" href="register.html" id="acctBtn">Sign up</a>
+                        <a class="btn sm pink hide-xs" href="{{ route('register') }}" id="acctBtn">Sign up</a>
                         <button aria-label="Open cart" class="btn sm" id="cartBtn" type="button">
                             <svg
                                 fill="none"
@@ -71,7 +71,7 @@
                                 <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"></path>
                                 <circle cx="10" cy="20.5" r="1.3"></circle>
                                 <circle cx="18" cy="20.5" r="1.3"></circle></svg
-                            ><span class="cart-n">2</span></button
+                            ><span class="cart-n">0</span></button
                         ><!-- Logged-in customer: use these buttons instead of the ones above.
 <a aria-label="Updates" class="btn sm white icon-btn" href="customer/updates.html"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewBox="0 0 24 24" width="18"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path><path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg><span class="cart-n dot">2</span></a>
 <a class="btn sm white" data-first="Ada" href="customer/dashboard.html" id="userBtn" title="Open my dashboard"><span class="avatar">AO</span><span class="hide-sm">Ada</span></a>
@@ -94,5 +94,6 @@
         <script src="{{ asset('assets/js/store.js') }}"></script>
         <script src="{{ asset('assets/js/toony.js') }}"></script>
 
+        @stack('scripts')
     </body>
 </html>
