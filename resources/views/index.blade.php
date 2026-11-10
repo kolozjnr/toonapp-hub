@@ -262,7 +262,6 @@
                 <span>© 2026 ToonApp Hub</span><span><a href="{{ route('contact') }}">Contact us</a> · Made for animators</span>
             </div>
         </footer>
-        @include('partials.cart-drawer')
         <div aria-hidden="true" class="buddy off" id="buddy">
             <div class="buddy-bubble hide"></div>
             <svg aria-hidden="true" class="toon" viewBox="0 0 360 370">

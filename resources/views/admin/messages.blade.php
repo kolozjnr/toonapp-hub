@@ -1,7 +1,6 @@
 
     <x-app-layout>
         <div class="app">
-            
             @include('layouts.admin-nav')
             <div class="app-main">
                 <header class="top">
@@ -48,7 +47,9 @@
                         >
                         <div class="who">
                             <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            ><span class="tx"
+                                ><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span
+                            >
                         </div>
                     </div>
                 </header>
@@ -56,279 +57,189 @@
                     <section class="panel">
                         <div class="panel-h">
                             <div>
-                                <h2>Inbox <span class="badge bad" id="inboxBadge">2 new</span></h2>
+                                <h2>
+                                    Inbox
+                                    <span class="badge bad" id="inboxBadge" @if ($unreadCount === 0) hidden @endif
+                                        >{{ $unreadCount }} new</span
+                                    >
+                                </h2>
                                 <p>Reply by email. Customers see your reply in their inbox.</p>
                             </div>
                             <div class="savebar">
-                                <button class="btn sm" data-f="all" type="button">All (3)</button
-                                ><button class="btn sm ghost" data-f="unread" type="button">Unread (2)</button>
+                                <button class="btn sm" data-f="all" type="button">All ({{ $totalCount }})</button
+                                ><button class="btn sm ghost" data-f="unread" type="button"
+                                    >Unread ({{ $unreadCount }})</button
+                                >
                             </div>
                         </div>
                         <div class="list">
-                            <div class="row-i row-top" data-message="" data-unread="">
-                                <span aria-hidden="true" class="kpi-dot"
-                                    ><svg
-                                        fill="none"
-                                        height="18"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
-                                        width="18"
-                                    >
-                                        <path d="M4 5h16v11H8l-4 4z"></path></svg
-                                ></span>
-                                <div class="grow">
-                                    <b
-                                        >Tunde Bello <span class="badge bad" data-new-badge="">New</span>
-                                        <span class="badge plain">Help with a purchase or download</span></b
-                                    ><small>tunde@example.com · 29 Oct 2026 04:41 PM</small>
-                                    <p>
-                                        Hi, I bought Line Boil FX but I can't find the Blender add-on in the zip. Can
-                                        you help?
-                                    </p>
-                                    <div class="acts align-left mt-10">
-                                        <a
-                                            class="btn xs"
-                                            data-read="m1"
-                                            href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=tunde%40example.com&amp;su=Re%3A%20Help%20with%20a%20purchase%20or%20download"
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                            ><svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
-                                            >
-                                                <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                <path d="m4 7 8 6 8-6"></path></svg
-                                            >Reply in Gmail</a
+                            @forelse ($messages as $message)
+                                <div class="row-i row-top" data-message @if ($message->isUnread()) data-unread @endif>
+                                    <span aria-hidden="true" class="kpi-dot"
+                                        ><svg
+                                            fill="none"
+                                            height="18"
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            viewBox="0 0 24 24"
+                                            width="18"
                                         >
-                                        <button class="btn xs ghost" data-copy="tunde@example.com" type="button">
-                                            <svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
+                                            <path d="M4 5h16v11H8l-4 4z"></path></svg
+                                    ></span>
+                                    <div class="grow">
+                                        <b
+                                            >{{ $message->name }}
+                                            <span class="badge bad" data-new-badge @if (! $message->isUnread()) hidden @endif
+                                                >New</span
                                             >
-                                                <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                                <path
-                                                    d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                                                ></path></svg
-                                            >Copy email
-                                        </button>
-                                        <button class="btn xs ghost" data-toggle="m1" type="button">Mark read</button>
-                                        <button class="btn xs danger ghost" data-del="m1" type="button">Delete</button>
+                                            <span class="badge plain">{{ $message->topic }}</span></b
+                                        ><small
+                                            >{{ $message->email }} · {{ $message->created_at->format('d M Y h:i A') }}</small
+                                        >
+                                        <p>{{ \Illuminate\Support\Str::limit($message->message, 240) }}</p>
+                                        <div class="acts align-left mt-10">
+                                            <a
+                                                class="btn xs"
+                                                data-read
+                                                href="{{ $message->gmailReplyUrl() }}"
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                                ><svg
+                                                    fill="none"
+                                                    height="18"
+                                                    stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    viewBox="0 0 24 24"
+                                                    width="18"
+                                                >
+                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
+                                                    <path d="m4 7 8 6 8-6"></path></svg
+                                                >Reply in Gmail</a
+                                            >
+                                            <button class="btn xs ghost" data-copy="{{ $message->email }}" type="button">
+                                                <svg
+                                                    fill="none"
+                                                    height="18"
+                                                    stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    viewBox="0 0 24 24"
+                                                    width="18"
+                                                >
+                                                    <rect height="12" rx="2" width="12" x="8" y="8"></rect>
+                                                    <path
+                                                        d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+                                                    ></path></svg
+                                                >Copy email
+                                            </button>
+                                            <form method="post" action="{{ route('admin.messages.read', $message) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input
+                                                    type="hidden"
+                                                    name="read"
+                                                    value="{{ $message->isUnread() ? 1 : 0 }}"
+                                                />
+                                                <button class="btn xs ghost" data-toggle type="submit">
+                                                    {{ $message->isUnread() ? 'Mark read' : 'Mark unread' }}
+                                                </button>
+                                            </form>
+                                            <form
+                                                data-confirm="Delete this message from {{ $message->name }}? This cannot be undone."
+                                                method="post"
+                                                action="{{ route('admin.messages.destroy', $message) }}"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn xs danger ghost" type="submit">Delete</button>
+                                            </form>
+                                            <form
+                                                data-read-form
+                                                hidden
+                                                method="post"
+                                                action="{{ route('admin.messages.read', $message) }}"
+                                            >
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="read" value="1" />
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row-i row-top" data-message="" data-unread="">
-                                <span aria-hidden="true" class="kpi-dot"
-                                    ><svg
-                                        fill="none"
-                                        height="18"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
-                                        width="18"
-                                    >
-                                        <path d="M4 5h16v11H8l-4 4z"></path></svg
-                                ></span>
-                                <div class="grow">
-                                    <b
-                                        >Sara Mensah <span class="badge bad" data-new-badge="">New</span>
-                                        <span class="badge plain">Feature request</span></b
-                                    ><small>sara@example.com · 28 Oct 2026 05:41 PM</small>
-                                    <p>Would love a Premiere Pro version of Squash &amp; Stretch Pro!</p>
-                                    <div class="acts align-left mt-10">
-                                        <a
-                                            class="btn xs"
-                                            data-read="m2"
-                                            href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=sara%40example.com&amp;su=Re%3A%20Feature%20request"
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                            ><svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
-                                            >
-                                                <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                <path d="m4 7 8 6 8-6"></path></svg
-                                            >Reply in Gmail</a
-                                        >
-                                        <button class="btn xs ghost" data-copy="sara@example.com" type="button">
-                                            <svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
-                                            >
-                                                <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                                <path
-                                                    d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                                                ></path></svg
-                                            >Copy email
-                                        </button>
-                                        <button class="btn xs ghost" data-toggle="m2" type="button">Mark read</button>
-                                        <button class="btn xs danger ghost" data-del="m2" type="button">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row-i row-top" data-message="">
-                                <span aria-hidden="true" class="kpi-dot"
-                                    ><svg
-                                        fill="none"
-                                        height="18"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
-                                        width="18"
-                                    >
-                                        <path d="M4 5h16v11H8l-4 4z"></path></svg
-                                ></span>
-                                <div class="grow">
-                                    <b
-                                        >Liam Chen <span class="badge bad" data-new-badge="" hidden="">New</span>
-                                        <span class="badge plain">Question about a plugin</span></b
-                                    ><small>liam@example.com · 26 Oct 2026 07:41 PM</small>
-                                    <p>Does Smear Frames work with shape layers that have trim paths?</p>
-                                    <div class="acts align-left mt-10">
-                                        <a
-                                            class="btn xs"
-                                            data-read="m3"
-                                            href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=liam%40example.com&amp;su=Re%3A%20Question%20about%20a%20plugin"
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                            ><svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
-                                            >
-                                                <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                <path d="m4 7 8 6 8-6"></path></svg
-                                            >Reply in Gmail</a
-                                        >
-                                        <button class="btn xs ghost" data-copy="liam@example.com" type="button">
-                                            <svg
-                                                fill="none"
-                                                height="18"
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                viewBox="0 0 24 24"
-                                                width="18"
-                                            >
-                                                <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                                <path
-                                                    d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
-                                                ></path></svg
-                                            >Copy email
-                                        </button>
-                                        <button class="btn xs ghost" data-toggle="m3" type="button">Mark unread</button>
-                                        <button class="btn xs danger ghost" data-del="m3" type="button">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
+                            @empty
+                                <p class="note">No messages yet. Messages from the Contact page will show up here.</p>
+                            @endforelse
                         </div>
                     </section>
                 </main>
             </div>
         </div>
-        
-    </x-app-layout>
-        <script>
-            /* Admin messages: filter all/unread, mark read, delete. (Copy email is in ui.js.) */
-            (function () {
-                "use strict";
-                var content = document.getElementById("content");
-                var filter = "all";
-                function rows() {
-                    return Toon.$$("[data-message]", content);
-                }
-                function refresh() {
-                    var all = rows(),
-                        unread = all.filter(function (r) {
-                            return r.hasAttribute("data-unread");
-                        });
-                    all.forEach(function (r) {
-                        r.hidden = filter === "unread" && !r.hasAttribute("data-unread");
-                        r.querySelector("[data-new-badge]").hidden = !r.hasAttribute("data-unread");
-                        r.querySelector("[data-toggle]").textContent = r.hasAttribute("data-unread")
-                            ? "Mark read"
-                            : "Mark unread";
-                    });
-                    var badge = document.getElementById("inboxBadge");
-                    badge.textContent = unread.length + " new";
-                    badge.hidden = unread.length === 0;
-                    var allBtn = content.querySelector('[data-f="all"]'),
-                        unBtn = content.querySelector('[data-f="unread"]');
-                    allBtn.textContent = "All (" + all.length + ")";
-                    unBtn.textContent = "Unread (" + unread.length + ")";
-                    allBtn.classList.toggle("ghost", filter !== "all");
-                    unBtn.classList.toggle("ghost", filter !== "unread");
-                }
-                function setRead(row, read) {
-                    if (read) row.removeAttribute("data-unread");
-                    else row.setAttribute("data-unread", "");
-                }
 
-                content.addEventListener("click", function (e) {
-                    var f = e.target.closest("[data-f]");
-                    if (f) {
-                        filter = f.dataset.f;
-                        refresh();
-                        return;
+        @push('scripts')
+            <script>
+                /* Admin messages: filter all/unread; replying records the message as read. */
+                (function () {
+                    "use strict";
+                    var content = document.getElementById("content");
+                    var filter = "all";
+
+                    function rows() {
+                        return Toon.$$("[data-message]", content);
                     }
-                    var reply = e.target.closest("[data-read]");
-                    if (reply) {
-                        setRead(reply.closest("[data-message]"), true);
-                        refresh();
-                        return;
+
+                    function refresh() {
+                        var all = rows(),
+                            unread = all.filter(function (row) {
+                                return row.hasAttribute("data-unread");
+                            });
+                        all.forEach(function (row) {
+                            row.hidden = filter === "unread" && !row.hasAttribute("data-unread");
+                            row.querySelector("[data-new-badge]").hidden = !row.hasAttribute("data-unread");
+                            row.querySelector("[data-toggle]").textContent = row.hasAttribute("data-unread")
+                                ? "Mark read"
+                                : "Mark unread";
+                        });
+                        var badge = document.getElementById("inboxBadge");
+                        badge.textContent = unread.length + " new";
+                        badge.hidden = unread.length === 0;
+                        var allBtn = content.querySelector('[data-f="all"]'),
+                            unBtn = content.querySelector('[data-f="unread"]');
+                        allBtn.textContent = "All (" + all.length + ")";
+                        unBtn.textContent = "Unread (" + unread.length + ")";
+                        allBtn.classList.toggle("ghost", filter !== "all");
+                        unBtn.classList.toggle("ghost", filter !== "unread");
                     }
-                    var t = e.target.closest("[data-toggle]");
-                    if (t) {
-                        // DEMO: Laravel saves the read state.
-                        var row = t.closest("[data-message]");
-                        setRead(row, row.hasAttribute("data-unread"));
-                        refresh();
-                        return;
-                    }
-                    var del = e.target.closest("[data-del]");
-                    if (del && Toon.armed(del)) {
-                        // DEMO: Laravel deletes the message.
-                        del.closest("[data-message]").remove();
-                        refresh();
-                        Toon.toast("Message deleted");
-                    }
-                });
-                refresh();
-            })();
-        </script>
+
+                    content.addEventListener("click", function (event) {
+                        var filterButton = event.target.closest("[data-f]");
+                        if (filterButton) {
+                            filter = filterButton.dataset.f;
+                            refresh();
+                            return;
+                        }
+
+                        var reply = event.target.closest("[data-read]");
+                        if (reply) {
+                            var form = reply.closest("[data-message]").querySelector("[data-read-form]");
+                            if (form) form.submit();
+                        }
+                    });
+
+                    document.addEventListener("submit", function (event) {
+                        var form = event.target.closest("form[data-confirm]");
+
+                        if (form && !window.confirm(form.dataset.confirm)) {
+                            event.preventDefault();
+                        }
+                    });
+
+                    refresh();
+                })();
+            </script>
+        @endpush
+    </x-app-layout>

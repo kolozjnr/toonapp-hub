@@ -46,8 +46,10 @@
                             ><span>View store</span></a
                         >
                         <div class="who">
-                            <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            <span class="av">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span
+                            ><span class="tx"
+                                ><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span
+                            >
                         </div>
                     </div>
                 </header>
@@ -71,7 +73,14 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Average rating</div>
-                                <div class="v">4.6 / 5</div>
+                                <div class="v">{{ $stats['total'] > 0 ? $stats['average'].' / 5' : '–' }}</div>
+                                <div class="s">
+                                    @if ($stats['total'] > 0)
+                                        Across {{ $stats['total'] }} {{ \Illuminate\Support\Str::plural('review', $stats['total']) }}
+                                    @else
+                                        No ratings yet
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -90,11 +99,17 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Reviews</div>
-                                <div class="v">5</div>
-                                <div class="s">4 with comments</div>
+                                <div class="v">{{ $stats['total'] }}</div>
+                                <div class="s">{{ $stats['commented'] }} with comments</div>
                             </div>
                         </div>
                     </section>
+                    <div class="toolbar">
+                        <span class="note">
+                            {{ $reviews->total() }} {{ \Illuminate\Support\Str::plural('review', $reviews->total()) }} ·
+                            newest first
+                        </span>
+                    </div>
                     <div class="tbl-wrap">
                         <table>
                             <thead>
@@ -108,127 +123,82 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('home') }}#shop"><b>Smear Frames</b></a>
-                                    </td>
-                                    <td><b>Liam Chen</b><span class="sub">Verified buyer</span></td>
-                                    <td>
-                                        <span aria-label="4.0 out of 5" class="stars"
-                                            ><i>★</i><i>★</i><i>★</i><i>★</i><i class="off">★</i></span
-                                        >
-                                    </td>
-                                    <td class="min-w-220">–</td>
-                                    <td class="num">29 Oct 2026</td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs danger ghost" data-del="r5" type="button">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('home') }}#shop"><b>Squash &amp; Stretch Pro</b></a>
-                                    </td>
-                                    <td><b>Tunde Bello</b><span class="sub">Verified buyer</span></td>
-                                    <td>
-                                        <span aria-label="5.0 out of 5" class="stars"
-                                            ><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span
-                                        >
-                                    </td>
-                                    <td class="min-w-220">
-                                        Saved me hours on a client job. The bounce slider is perfect.
-                                    </td>
-                                    <td class="num">28 Oct 2026</td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs danger ghost" data-del="r1" type="button">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('home') }}#shop"><b>Toon Shadows</b></a>
-                                    </td>
-                                    <td><b>Maria Garcia</b><span class="sub">Verified buyer</span></td>
-                                    <td>
-                                        <span aria-label="4.0 out of 5" class="stars"
-                                            ><i>★</i><i>★</i><i>★</i><i>★</i><i class="off">★</i></span
-                                        >
-                                    </td>
-                                    <td class="min-w-220">Great look. I'd love one more shadow band.</td>
-                                    <td class="num">25 Oct 2026</td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs danger ghost" data-del="r3" type="button">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('home') }}#shop"><b>Line Boil FX</b></a>
-                                    </td>
-                                    <td><b>Jon Park</b><span class="sub">Verified buyer</span></td>
-                                    <td>
-                                        <span aria-label="5.0 out of 5" class="stars"
-                                            ><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span
-                                        >
-                                    </td>
-                                    <td class="min-w-220">Exactly the hand-drawn wobble I wanted.</td>
-                                    <td class="num">22 Oct 2026</td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs danger ghost" data-del="r4" type="button">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <a href="{{ route('home') }}#shop"><b>Squash &amp; Stretch Pro</b></a>
-                                    </td>
-                                    <td><b>Ada Okafor</b><span class="sub">Verified buyer</span></td>
-                                    <td>
-                                        <span aria-label="5.0 out of 5" class="stars"
-                                            ><i>★</i><i>★</i><i>★</i><i>★</i><i>★</i></span
-                                        >
-                                    </td>
-                                    <td class="min-w-220">So easy to use. My characters finally feel bouncy.</td>
-                                    <td class="num">20 Oct 2026</td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs danger ghost" data-del="r2" type="button">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @forelse ($reviews as $review)
+                                    <tr>
+                                        <td>
+                                            @if ($review->plugin)
+                                                <a href="{{ route('admin.plugins.show', $review->plugin) }}"
+                                                    ><b>{{ $review->plugin->name }}</b></a
+                                                >
+                                            @else
+                                                <b>Removed plugin</b>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <b>{{ $review->user?->name ?? 'Deleted customer' }}</b>
+                                            <span class="sub">{{ $review->user?->email }}</span>
+                                        </td>
+                                        <td>@include('partials.stars', ['rating' => $review->rating])</td>
+                                        <td class="min-w-220">{{ $review->comment ?: '–' }}</td>
+                                        <td class="num">{{ $review->created_at->format('d M Y') }}</td>
+                                        <td>
+                                            <div class="acts">
+                                                <form
+                                                    data-confirm="Remove this review? This cannot be undone."
+                                                    method="post"
+                                                    action="{{ route('admin.reviews.destroy', $review) }}"
+                                                >
+                                                    @csrf
+                                                    @method('delete')
+                                                    <button class="btn xs danger ghost" type="submit">Remove</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="note" colspan="6">
+                                            No reviews yet. Reviews appear here as soon as customers rate a plugin.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
+
+                    @if ($reviews->hasPages())
+                        <div class="toolbar" style="margin-top: 16px;">
+                            <span class="note">
+                                Showing {{ $reviews->firstItem() }}–{{ $reviews->lastItem() }} of {{ $reviews->total() }}
+                            </span>
+                            <div class="acts ml-auto">
+                                @if ($reviews->onFirstPage())
+                                    <span class="btn xs ghost" aria-disabled="true">Previous</span>
+                                @else
+                                    <a class="btn xs ghost" href="{{ $reviews->previousPageUrl() }}">Previous</a>
+                                @endif
+                                @if ($reviews->hasMorePages())
+                                    <a class="btn xs ghost" href="{{ $reviews->nextPageUrl() }}">Next</a>
+                                @else
+                                    <span class="btn xs ghost" aria-disabled="true">Next</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </main>
             </div>
         </div>
-       
-    </x-app-layout>
-        <script>
-            /* Admin reviews: remove a review with a second tap. */
-            (function () {
-                "use strict";
-                document.getElementById("content").addEventListener("click", function (e) {
-                    var del = e.target.closest("[data-del]");
-                    if (del && Toon.armed(del)) {
-                        // DEMO: Laravel deletes the review.
-                        del.closest("tr").remove();
-                        Toon.toast("Review removed");
+
+        @push('scripts')
+            <script>
+                /* Admin reviews: confirm before a review is removed. */
+                document.addEventListener("submit", function (event) {
+                    var form = event.target.closest("form[data-confirm]");
+
+                    if (form && !window.confirm(form.dataset.confirm)) {
+                        event.preventDefault();
                     }
                 });
-            })();
-        </script>
+            </script>
+        @endpush
+    </x-app-layout>

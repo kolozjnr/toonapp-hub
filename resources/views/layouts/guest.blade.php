@@ -23,8 +23,26 @@
         <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}" />
     </head>
-    <body class="">
+    <body class=""
+        data-cart-items="{{ route('cart.items') }}"
+        data-cart-add="{{ route('cart.add') }}"
+        data-cart-remove="{{ route('cart.remove') }}"
+    >
         @include('partials.flash')
+
+        @php
+            $authUser = auth()->user();
+            $navFirst = $authUser
+                ? \Illuminate\Support\Str::of($authUser->name)->squish()->explode(' ')->filter()->first()
+                : '';
+            $navInitials = $authUser
+                ? \Illuminate\Support\Str::of($authUser->name)
+                    ->squish()->explode(' ')->filter()->take(2)
+                    ->map(fn ($word) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($word, 0, 1)))
+                    ->implode('')
+                : '';
+            $isAdminNav = $authUser ? $authUser->hasAnyRole(['superadmin', 'admin']) : false;
+        @endphp
 
         <header class="bar">
             <div class="wrap">
@@ -40,7 +58,7 @@
                         <a data-goto="contact" href="{{ route('contact') }}">Contact</a>
                     </nav>
                     <div class="bar-right">
-                        <!-- Logged-out visitor (shown in this template). --><a
+                        @guest<a
                             class="btn sm white"
                             href="{{ route('login') }}"
                             id="loginLink"
@@ -57,6 +75,16 @@
                             ><span class="hide-sm">Log in</span></a
                         >
                         <a class="btn sm pink hide-xs" href="{{ route('register') }}" id="acctBtn">Sign up</a>
+                        @else
+                        @if ($isAdminNav)
+                        <a class="btn sm purple" href="{{ route('admin.dashboard') }}"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.8" viewBox="0 0 24 24" width="16"><rect height="9" rx="1.5" width="7" x="3" y="3"></rect><rect height="5" rx="1.5" width="7" x="14" y="3"></rect><rect height="9" rx="1.5" width="7" x="14" y="12"></rect><rect height="5" rx="1.5" width="7" x="3" y="16"></rect></svg><span class="hide-sm">Admin dashboard</span></a>
+                        @else
+                        <a class="btn sm white" data-first="{{ $navFirst }}" href="{{ route('customer.dashboard') }}" id="userBtn" title="Open my dashboard"><span class="avatar">{{ $navInitials }}</span><span class="hide-sm">{{ $navFirst }}</span></a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}" style="display: contents">@csrf
+                            <button class="btn sm white" type="submit"><span class="hide-sm">Log out</span></button>
+                        </form>
+                        @endguest
                         <button aria-label="Open cart" class="btn sm" id="cartBtn" type="button">
                             <svg
                                 fill="none"
@@ -71,15 +99,8 @@
                                 <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"></path>
                                 <circle cx="10" cy="20.5" r="1.3"></circle>
                                 <circle cx="18" cy="20.5" r="1.3"></circle></svg
-                            ><span class="cart-n">0</span></button
-                        ><!-- Logged-in customer: use these buttons instead of the ones above.
-<a aria-label="Updates" class="btn sm white icon-btn" href="customer/updates.html"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewBox="0 0 24 24" width="18"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path><path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg><span class="cart-n dot">2</span></a>
-<a class="btn sm white" data-first="Ada" href="customer/dashboard.html" id="userBtn" title="Open my dashboard"><span class="avatar">AO</span><span class="hide-sm">Ada</span></a>
-<button aria-label="Open cart" class="btn sm" id="cartBtn" type="button"><svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewBox="0 0 24 24" width="18"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"></path><circle cx="10" cy="20.5" r="1.3"></circle><circle cx="18" cy="20.5" r="1.3"></circle></svg><span class="cart-n">2</span></button>
---><!-- Logged-in admin: use these buttons instead (no cart).
-<a class="btn sm purple" href="admin/dashboard.html"><svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.8" viewBox="0 0 24 24" width="16"><rect height="9" rx="1.5" width="7" x="3" y="3"></rect><rect height="5" rx="1.5" width="7" x="14" y="3"></rect><rect height="9" rx="1.5" width="7" x="14" y="12"></rect><rect height="5" rx="1.5" width="7" x="3" y="16"></rect></svg><span class="hide-sm">Admin dashboard</span></a>
-<a class="btn sm white" href="login.html">Log out</a>
--->
+                            ><span class="cart-n">{{ $cartCount ?? 0 }}</span></button
+                        >
                     </div>
                 </div>
             </div>
@@ -87,6 +108,7 @@
 
             {{-- <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg"> --}}
                 {{ $slot }}
+        @include('partials.cart-drawer')
             {{-- </div>
         </div> --}}
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

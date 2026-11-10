@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 test('registration screen can be rendered', function () {
     $response = $this->get('/register');
 
@@ -32,6 +34,8 @@ test('new users can register', function () {
         'country' => 'United States',
         'newsletter' => true,
     ]);
+
+    expect(User::where('email', 'test@example.com')->first()->hasRole('user'))->toBeTrue();
 });
 
 test('registration requires the new profile fields', function () {

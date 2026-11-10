@@ -47,7 +47,7 @@
                         >
                         <div class="who">
                             <span class="av">AO</span
-                            ><span class="tx"><b>Ada Okafor</b><small>ada@example.com</small></span>
+                            ><span class="tx"><b>{{ Auth::user()->name }}</b><small> {{ Auth::user()->email }} </small></span>
                         </div>
                     </div>
                 </header>
@@ -70,7 +70,7 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Orders</div>
-                                <div class="v">2</div>
+                                <div class="v">{{ $summary['orders'] }}</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -91,7 +91,7 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Total spent</div>
-                                <div class="v">$29.00</div>
+                                <div class="v">{{ $summary['spent_label'] }}</div>
                             </div>
                         </div>
                     </section>
@@ -108,78 +108,97 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="num"><b>TK4M8D</b></td>
-                                    <td class="num">26 Oct 2026</td>
-                                    <td>Bounce Presets</td>
-                                    <td class="num"><b>$0.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-mail="o4" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Email my links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK1J3G</b></td>
-                                    <td class="num">17 Oct 2026</td>
-                                    <td>Squash &amp; Stretch Pro</td>
-                                    <td class="num"><b>$29.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-mail="o7" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Email my links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @forelse ($orders as $order)
+                                    <tr>
+                                        <td class="num"><b>{{ $order->reference }}</b></td>
+                                        <td class="num">{{ ($order->paid_at ?? $order->created_at)->format('d M Y') }}</td>
+                                        <td>{{ implode(', ', array_column($order->items ?: [], 'name')) ?: '—' }}</td>
+                                        <td class="num"><b>{{ $order->amountLabel() }}</b></td>
+                                        <td>
+                                            @if ($order->isSuccessful())
+                                                <span class="badge ok">Paid</span>
+                                            @elseif ($order->hasFailed())
+                                                <span class="badge bad">Failed</span>
+                                            @else
+                                                <span class="badge warn">Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($order->isSuccessful())
+                                                <div class="acts">
+                                                    <button
+                                                        class="btn xs ghost"
+                                                        data-email="{{ Auth::user()->email }}"
+                                                        data-resend="{{ $order->reference }}"
+                                                        type="button"
+                                                    >
+                                                        <svg
+                                                            fill="none"
+                                                            height="18"
+                                                            stroke="currentColor"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            viewBox="0 0 24 24"
+                                                            width="18"
+                                                        >
+                                                            <rect height="14" rx="2" width="18" x="3" y="5"></rect>
+                                                            <path d="m4 7 8 6 8-6"></path></svg
+                                                        >Email my links
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="note" colspan="6">
+                                            No orders yet. Your receipts appear here as soon as you check out.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     <p class="note">
-                        “Email my links” sends the download links for that order to ada@example.com again.
+                        “Email my links” sends the download links for that order to {{ Auth::user()->email }} again.
                     </p>
+
+                    @if ($orders->hasPages())
+                        <div class="toolbar" style="margin-top: 16px;">
+                            <span class="note">
+                                Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }} of {{ $orders->total() }}
+                            </span>
+                            <div class="acts ml-auto">
+                                @if ($orders->onFirstPage())
+                                    <span class="btn xs ghost" aria-disabled="true">Previous</span>
+                                @else
+                                    <a class="btn xs ghost" href="{{ $orders->previousPageUrl() }}">Previous</a>
+                                @endif
+                                @if ($orders->hasMorePages())
+                                    <a class="btn xs ghost" href="{{ $orders->nextPageUrl() }}">Next</a>
+                                @else
+                                    <span class="btn xs ghost" aria-disabled="true">Next</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </main>
             </div>
         </div>
 
+        @push('scripts')
+            <script>
+                /* Customer orders: re-send the download links for an order. */
+                (function () {
+                    "use strict";
+                    document.getElementById("content").addEventListener("click", function (e) {
+                        var btn = e.target.closest("[data-resend]");
+                        if (!btn) return;
+                        // DEMO: Laravel emails the download links for this order.
+                        Toon.toast("Download links sent to " + (btn.dataset.email || "your address"));
+                    });
+                })();
+            </script>
+        @endpush
     </x-app-layout>
-<script>
-            /* Customer orders: re-send the download links for an order. */
-            (function () {
-                "use strict";
-                document.getElementById("content").addEventListener("click", function (e) {
-                    var btn = e.target.closest("[data-mail]");
-                    if (!btn) return;
-                    // DEMO: Laravel emails the download links for this order.
-                    Toon.toast("Download links sent to ada@example.com");
-                });
-            })();
-        </script>

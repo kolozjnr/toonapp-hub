@@ -48,7 +48,9 @@
                         >
                         <div class="who">
                             <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            ><span class="tx"
+                                ><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span
+                            >
                         </div>
                     </div>
                 </header>
@@ -71,8 +73,8 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Orders</div>
-                                <div class="v">7</div>
-                                <div class="s">5 this week</div>
+                                <div class="v">{{ $summary['orders'] }}</div>
+                                <div class="s">{{ $summary['orders_this_week'] }} this week</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -93,8 +95,8 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Revenue</div>
-                                <div class="v">$143.00</div>
-                                <div class="s">$99.00 this week</div>
+                                <div class="v">{{ $summary['revenue_label'] }}</div>
+                                <div class="s">{{ $summary['revenue_this_week_label'] }} this week</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -115,13 +117,20 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Average order</div>
-                                <div class="v">$20.43</div>
+                                <div class="v">{{ $summary['average_label'] }}</div>
+                                <div class="s">
+                                    @if ($summary['paid'] > 0)
+                                        Across {{ $summary['paid'] }} {{ \Illuminate\Support\Str::plural('paid order', $summary['paid']) }}
+                                    @else
+                                        No paid orders yet
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </section>
                     <div class="toolbar">
-                        <label class="search"
-                            ><svg
+                        <form action="{{ route('admin.orders') }}" class="search" method="GET" role="search">
+                            <svg
                                 fill="none"
                                 height="16"
                                 stroke="currentColor"
@@ -130,8 +139,9 @@
                                 width="16"
                             >
                                 <circle cx="11" cy="11" r="7"></circle>
-                                <path d="m20 20-3.5-3.5"></path></svg
-                            ><input
+                                <path d="m20 20-3.5-3.5"></path>
+                            </svg>
+                            <input
                                 aria-label="Search orders"
                                 data-search="#orderRows"
                                 data-search-empty="#noResults"
@@ -140,8 +150,18 @@
                                 name="q"
                                 placeholder="Search by order, customer or plugin"
                                 type="search"
-                                value=""
-                        /></label>
+                                value="{{ request('q') }}"
+                            />
+                        </form>
+                        <span class="note">
+                            {{ $summary['orders'] }} {{ \Illuminate\Support\Str::plural('order', $summary['orders']) }} · {{ $summary['paid'] }} paid
+                            @if ($summary['awaiting'] > 0)
+                                · {{ $summary['awaiting'] }} awaiting payment
+                            @endif
+                            @if ($summary['failed'] > 0)
+                                · {{ $summary['failed'] }} failed
+                            @endif
+                        </span>
                     </div>
                     <div class="tbl-wrap">
                         <table>
@@ -157,218 +177,102 @@
                                 </tr>
                             </thead>
                             <tbody id="orderRows">
-                                <tr>
-                                    <td class="num"><b>TK7Q2M</b></td>
-                                    <td class="num">29 Oct 2026<span class="sub">05:41 PM</span></td>
-                                    <td><b>Liam Chen</b><span class="sub">liam@example.com</span></td>
-                                    <td>Smear Frames</td>
-                                    <td class="num"><b>$19.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o1" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
+                                @forelse ($orders as $order)
+                                    <tr>
+                                        <td class="num"><b>{{ $order->reference }}</b></td>
+                                        <td class="num">
+                                            {{ ($order->paid_at ?? $order->created_at)->format('d M Y') }}
+                                            <span class="sub">{{ ($order->paid_at ?? $order->created_at)->format('h:i A') }}</span>
+                                        </td>
+                                        <td>
+                                            <b>{{ $order->user?->name ?? 'Unknown customer' }}</b>
+                                            <span class="sub">{{ $order->user?->email }}</span>
+                                        </td>
+                                        <td>{{ implode(', ', array_column($order->items ?: [], 'name')) ?: '—' }}</td>
+                                        <td class="num"><b>{{ $order->amountLabel() }}</b></td>
+                                        <td>
+                                            @if ($order->isSuccessful())
+                                                <span class="badge ok">Paid</span>
+                                            @elseif ($order->hasFailed())
+                                                <span class="badge bad">Failed</span>
+                                            @else
+                                                <span class="badge warn">Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="acts">
+                                                <button
+                                                    class="btn xs ghost"
+                                                    data-email="{{ $order->user?->email }}"
+                                                    data-resend="{{ $order->reference }}"
+                                                    type="button"
                                                 >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK6P9A</b></td>
-                                    <td class="num">28 Oct 2026<span class="sub">04:41 PM</span></td>
-                                    <td><b>Tunde Bello</b><span class="sub">tunde@example.com</span></td>
-                                    <td>Squash &amp; Stretch Pro, Line Boil FX</td>
-                                    <td class="num"><b>$44.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o2" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK5N4C</b></td>
-                                    <td class="num">27 Oct 2026<span class="sub">02:41 PM</span></td>
-                                    <td><b>Maria Garcia</b><span class="sub">maria@example.com</span></td>
-                                    <td>Wiggle Text Pack</td>
-                                    <td class="num"><b>$12.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o3" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK4M8D</b></td>
-                                    <td class="num">26 Oct 2026<span class="sub">05:41 PM</span></td>
-                                    <td><b>Ada Okafor</b><span class="sub">ada@example.com</span></td>
-                                    <td>Bounce Presets</td>
-                                    <td class="num"><b>$0.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o4" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK3L1E</b></td>
-                                    <td class="num">24 Oct 2026<span class="sub">06:41 PM</span></td>
-                                    <td><b>Maria Garcia</b><span class="sub">maria@example.com</span></td>
-                                    <td>Toon Shadows</td>
-                                    <td class="num"><b>$24.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o5" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK2K7F</b></td>
-                                    <td class="num">21 Oct 2026<span class="sub">03:41 PM</span></td>
-                                    <td><b>Jon Park</b><span class="sub">jon@example.com</span></td>
-                                    <td>Line Boil FX</td>
-                                    <td class="num"><b>$15.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o6" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num"><b>TK1J3G</b></td>
-                                    <td class="num">17 Oct 2026<span class="sub">01:41 PM</span></td>
-                                    <td><b>Ada Okafor</b><span class="sub">ada@example.com</span></td>
-                                    <td>Squash &amp; Stretch Pro</td>
-                                    <td class="num"><b>$29.00</b></td>
-                                    <td><span class="badge ok">Paid</span></td>
-                                    <td>
-                                        <div class="acts">
-                                            <button class="btn xs ghost" data-resend="o7" type="button">
-                                                <svg
-                                                    fill="none"
-                                                    height="18"
-                                                    stroke="currentColor"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    viewBox="0 0 24 24"
-                                                    width="18"
-                                                >
-                                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                    <path d="m4 7 8 6 8-6"></path></svg
-                                                >Resend links
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                                    <svg
+                                                        fill="none"
+                                                        height="18"
+                                                        stroke="currentColor"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        viewBox="0 0 24 24"
+                                                        width="18"
+                                                    >
+                                                        <rect height="14" rx="2" width="18" x="3" y="5"></rect>
+                                                        <path d="m4 7 8 6 8-6"></path></svg
+                                                    >Resend links
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="note" colspan="7">
+                                            No orders yet. Orders appear here as soon as a shopper checks out.
+                                        </td>
+                                    </tr>
+                                @endforelse
                                 <tr data-search-ignore="" hidden="" id="noResults">
                                     <td class="note" colspan="7">No orders match your search.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    @if ($orders->hasPages())
+                        <div class="toolbar" style="margin-top: 16px;">
+                            <span class="note">
+                                Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }} of {{ $orders->total() }}
+                            </span>
+                            <div class="acts ml-auto">
+                                @if ($orders->onFirstPage())
+                                    <span class="btn xs ghost" aria-disabled="true">Previous</span>
+                                @else
+                                    <a class="btn xs ghost" href="{{ $orders->previousPageUrl() }}">Previous</a>
+                                @endif
+                                @if ($orders->hasMorePages())
+                                    <a class="btn xs ghost" href="{{ $orders->nextPageUrl() }}">Next</a>
+                                @else
+                                    <span class="btn xs ghost" aria-disabled="true">Next</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </main>
             </div>
         </div>
        
+        @push('scripts')
+            <script>
+                /* Admin orders: re-send download links to the customer. (Search is in ui.js.) */
+                (function () {
+                    "use strict";
+                    document.getElementById("orderRows").addEventListener("click", function (e) {
+                        var btn = e.target.closest("[data-resend]");
+                        if (!btn) return;
+                        // DEMO: Laravel emails the download links for this order.
+                        Toon.toast("Download links sent to " + (btn.dataset.email || "the customer"));
+                    });
+                })();
+            </script>
+        @endpush
     </x-app-layout>
-        <script>
-            /* Admin orders: re-send download links to the customer. (Search is in ui.js.) */
-            (function () {
-                "use strict";
-                document.getElementById("orderRows").addEventListener("click", function (e) {
-                    var btn = e.target.closest("[data-resend]");
-                    if (!btn) return;
-                    var email = btn.closest("tr").querySelector(".sub");
-                    // DEMO: Laravel emails the download links for this order.
-                    Toon.toast("Download links sent to " + (email ? email.textContent : "the customer"));
-                });
-            })();
-        </script>
-    </body>
-</html>

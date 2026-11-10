@@ -1,6 +1,7 @@
 
     <x-app-layout>
         <div class="app">
+
             @include('layouts.admin-nav')
             <div class="app-main">
                 <header class="top">
@@ -46,101 +47,48 @@
                             ><span>View store</span></a
                         >
                         <div class="who">
-                            <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            <span class="av">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span
+                            ><span class="tx"
+                                ><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span
+                            >
                         </div>
                     </div>
                 </header>
                 <main class="content" id="content">
-                    <section class="callout ok callout-stack" hidden="" id="nlSent">
-                        <div>
-                            <b>Posted! It's live in your customers' Updates.</b>To also send it by email, open it in
-                            Gmail with everyone in BCC, or copy the list into your email app.
-                        </div>
-                        <div class="code-box" id="nlEmails">ada@example.com, tunde@example.com</div>
-                        <div class="savebar">
-                            <a
-                                class="btn sm"
-                                href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;bcc=ada%40example.com%2Ctunde%40example.com&amp;su=Squash%20%26%20Stretch%20Pro%201.4%20is%20out&amp;body=Version%201.4%20adds%20character%20presets%20and%20a%20new%20overshoot%20slider.%0A%0ADownload%20the%20update%3A%20https%3A%2F%2Fdrive.google.com%2Ffile%2Fd%2Fexample-squash-1-4%0A%0ASquash%20%26%20Stretch%20Pro%20v1.4.0%0AWatch%20the%20tutorial%3A%20https%3A%2F%2Fwww.youtube.com%2F%40toonapphub%0AYour%20downloads%20are%20in%20My%20plugins%20on%20ToonApp%20Hub.%0A%0A%E2%80%94%20ToonApp%20Hub%0AYou're%20getting%20this%20because%20you%20asked%20for%20plugin%20updates.%20Reply%20%22unsubscribe%22%20to%20stop."
-                                rel="noopener noreferrer"
-                                target="_blank"
-                                ><svg
-                                    fill="none"
-                                    height="18"
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
-                                    width="18"
-                                >
-                                    <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                    <path d="m4 7 8 6 8-6"></path></svg
-                                >Open in Gmail (2)</a
-                            ><button
-                                class="btn sm ghost"
-                                data-copy="ada@example.com, tunde@example.com"
-                                data-copy-msg="Emails copied"
-                                id="cpEmails"
-                                type="button"
-                            >
-                                <svg
-                                    fill="none"
-                                    height="18"
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
-                                    width="18"
-                                >
-                                    <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg
-                                >Copy 2 emails</button
-                            ><button class="btn sm ghost" id="cpBody" type="button">
-                                <svg
-                                    fill="none"
-                                    height="18"
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
-                                    width="18"
-                                >
-                                    <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg
-                                >Copy message
-                            </button>
-                        </div>
-                    </section>
                     <div class="form-layout">
                         <section class="panel">
                             <div class="panel-h">
                                 <div>
                                     <h2>Write an update</h2>
-                                    <p>Shows in each customer's Updates, and you can email it too.</p>
+                                    <p>Emails every shopper who asked for plugin news, or only the owners of one plugin.</p>
                                 </div>
                             </div>
-                            <form action="newsletter.html" class="form" id="nlForm" method="post" novalidate="">
+                            <form action="{{ route('admin.newsletter.store') }}" class="form" id="nlForm" method="post">
+                                @csrf
                                 <div class="two">
                                     <div class="field">
                                         <label for="nlAud">Send to</label
-                                        ><select data-subscribers="5" id="nlAud" name="audience">
-                                            <option value="all">Everyone subscribed</option>
-                                            <option value="buyers">Owners of one plugin</option>
+                                        ><select data-subscribers="{{ $subscriberCount }}" id="nlAud" name="audience">
+                                            @foreach ($audiences as $value => $label)
+                                                <option @selected(old('audience', \App\Models\Newsletter::AUDIENCE_SUBSCRIBERS) === $value) value="{{ $value }}">
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                     <div class="field">
-                                        <label for="nlPlugin">About plugin <small>(optional)</small></label
+                                        <label for="nlPlugin">About plugin <small>(required for owners)</small></label
                                         ><select id="nlPlugin" name="plugin_id">
                                             <option value="">No specific plugin</option>
-                                            <option data-owners="1" value="smear">Smear Frames</option>
-                                            <option data-owners="2" value="squash">Squash &amp; Stretch Pro</option>
-                                            <option data-owners="2" value="boil">Line Boil FX</option>
-                                            <option data-owners="1" value="shadows">Toon Shadows</option>
-                                            <option data-owners="1" value="wiggle">Wiggle Text Pack</option>
-                                            <option data-owners="1" value="bounce">Bounce Presets</option>
+                                            @foreach ($plugins as $plugin)
+                                                <option
+                                                    data-owners="{{ $ownerCounts[$plugin->id] ?? 0 }}"
+                                                    @selected((string) old('plugin_id') === (string) $plugin->id)
+                                                    value="{{ $plugin->id }}"
+                                                >
+                                                    {{ $plugin->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -151,6 +99,9 @@
                                         maxlength="120"
                                         name="subject"
                                         placeholder="e.g. Squash Stretch 1.2 is out: new presets inside"
+                                        required
+                                        type="text"
+                                        value="{{ old('subject') }}"
                                     />
                                 </div>
                                 <div class="field">
@@ -161,7 +112,8 @@
                                         maxlength="4000"
                                         name="message"
                                         placeholder="What's new, what's fixed, and why they'll love it."
-                                    ></textarea>
+                                        required
+                                    >{{ old('message') }}</textarea>
                                 </div>
                                 <div class="field">
                                     <label for="nlLink">Download link <small>(optional)</small></label
@@ -170,13 +122,13 @@
                                         name="download_url"
                                         placeholder="https://drive.google.com/... link to the updated file"
                                         type="url"
+                                        value="{{ old('download_url') }}"
                                     /><small
-                                        >Customers get a Download button on this update. To keep it for buyers only,
-                                        choose "Owners of one plugin".</small
+                                        >Customers get a Download button on this update. To keep it for owners only, send
+                                        to the owners of one plugin.</small
                                     >
                                 </div>
-                                <span class="note" id="nlCount">5 subscribed customers will get this.</span
-                                ><span class="err" hidden="" id="nlErr"></span>
+                                <span class="note" id="nlCount">{{ $countNote }}</span>
                                 <div class="savebar">
                                     <button class="btn">
                                         <svg
@@ -191,7 +143,7 @@
                                         >
                                             <rect height="14" rx="2" width="18" x="3" y="5"></rect>
                                             <path d="m4 7 8 6 8-6"></path></svg
-                                        >Post update
+                                        >Send newsletter
                                     </button>
                                 </div>
                             </form>
@@ -201,52 +153,35 @@
                                 <div class="panel-h">
                                     <div>
                                         <h2>Sent updates</h2>
-                                        <p id="nlSentCount">3 so far</p>
+                                        <p>{{ $newsletterCount }} so far</p>
                                     </div>
                                 </div>
                                 <div class="list">
-                                    <div class="row-i row-top">
-                                        <div class="grow">
-                                            <b>New: Smear Frames just landed</b
-                                            ><small>28 Oct 2026 · Everyone · 5 subscribers</small>
-                                            <div class="acts align-left mt-8">
-                                                <button class="btn xs ghost" data-resend="n2" type="button">
-                                                    Email again</button
-                                                ><button class="btn xs danger ghost" data-del="n2" type="button">
-                                                    Delete
-                                                </button>
+                                    @forelse ($newsletters as $sent)
+                                        <div class="row-i row-top">
+                                            <div class="grow">
+                                                <b>{{ $sent->subject }}</b
+                                                ><small>{{ $sent->created_at->format('d M Y') }} · {{ $sent->audienceLabel() }} · {{ $sent->recipientsLabel() }}{{ $sent->download_url ? ' · has download' : '' }}</small>
+                                                <div class="acts align-left mt-8">
+                                                    <form method="post" action="{{ route('admin.newsletter.resend', $sent) }}">
+                                                        @csrf
+                                                        <button class="btn xs ghost" type="submit">Email again</button>
+                                                    </form>
+                                                    <form
+                                                        data-confirm="Delete “{{ $sent->subject }}”? This cannot be undone."
+                                                        method="post"
+                                                        action="{{ route('admin.newsletter.destroy', $sent) }}"
+                                                    >
+                                                        @csrf
+                                                        @method('delete')
+                                                        <button class="btn xs danger ghost" type="submit">Delete</button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row-i row-top">
-                                        <div class="grow">
-                                            <b>Squash &amp; Stretch Pro 1.4 is out</b
-                                            ><small
-                                                >27 Oct 2026 · Owners of Squash &amp; Stretch Pro · 2 subscribers · has
-                                                download</small
-                                            >
-                                            <div class="acts align-left mt-8">
-                                                <button class="btn xs ghost" data-resend="n1" type="button">
-                                                    Email again</button
-                                                ><button class="btn xs danger ghost" data-del="n1" type="button">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row-i row-top">
-                                        <div class="grow">
-                                            <b>Spring sale: 25% off Squash &amp; Stretch Pro</b
-                                            ><small>19 Oct 2026 · Everyone · 5 subscribers</small>
-                                            <div class="acts align-left mt-8">
-                                                <button class="btn xs ghost" data-resend="n3" type="button">
-                                                    Email again</button
-                                                ><button class="btn xs danger ghost" data-del="n3" type="button">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @empty
+                                        <p class="note">Nothing sent yet. Your first update will show up here.</p>
+                                    @endforelse
                                 </div>
                             </section>
                         </aside>
@@ -254,73 +189,42 @@
                 </main>
             </div>
         </div>
-        
+
+        @push('scripts')
+            <script>
+                /* Newsletter: how many subscribers the chosen audience reaches, and the delete confirm. */
+                document.addEventListener("submit", function (event) {
+                    var form = event.target.closest("form[data-confirm]");
+
+                    if (form && !window.confirm(form.dataset.confirm)) {
+                        event.preventDefault();
+                    }
+                });
+
+                (function () {
+                    var form = document.getElementById("nlForm");
+                    var count = document.getElementById("nlCount");
+
+                    function updateCount() {
+                        var audience = form.elements.audience;
+                        var plugin = form.elements.plugin_id;
+
+                        if (audience.value === "plugin" && !plugin.value) {
+                            count.textContent = "Pick the plugin whose owners should get this.";
+                            return;
+                        }
+
+                        var n =
+                            audience.value === "plugin"
+                                ? +plugin.selectedOptions[0].dataset.owners
+                                : +audience.dataset.subscribers;
+
+                        count.textContent = n + " subscribed customer" + (n === 1 ? "" : "s") + " will get this.";
+                    }
+
+                    form.addEventListener("change", updateCount);
+                    updateCount();
+                })();
+            </script>
+        @endpush
     </x-app-layout>
-        <script>
-            /* Admin newsletter: recipient count, form checks, "posted" panel, sent list actions. */
-            (function () {
-                "use strict";
-                var form = document.getElementById("nlForm");
-                var f = form.elements;
-                var err = document.getElementById("nlErr");
-                var sent = document.getElementById("nlSent");
-
-                function count() {
-                    var aud = f.audience,
-                        opt = f.plugin_id.selectedOptions[0];
-                    var note = document.getElementById("nlCount");
-                    if (aud.value === "buyers" && !f.plugin_id.value) {
-                        note.textContent = "Pick the plugin whose owners should get this.";
-                        return;
-                    }
-                    var n = aud.value === "buyers" ? +opt.dataset.owners : +aud.dataset.subscribers;
-                    note.textContent = n + " subscribed customer" + (n === 1 ? "" : "s") + " will get this.";
-                }
-                form.addEventListener("input", count);
-                form.addEventListener("change", count);
-
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    Toon.showErr(err, "");
-                    var link = f.download_url.value.trim();
-                    if (!f.subject.value.trim()) return Toon.showErr(err, "Add a subject.");
-                    if (!f.message.value.trim()) return Toon.showErr(err, "Write your message.");
-                    if (f.audience.value === "buyers" && !f.plugin_id.value)
-                        return Toon.showErr(err, "Pick the plugin whose owners should get this.");
-                    if (link && !Toon.linkOk(link))
-                        return Toon.showErr(err, "The download link should start with https://");
-                    // DEMO: Laravel saves the update for customers; the panel below helps you email it.
-                    document.getElementById("cpBody").dataset.copy =
-                        f.subject.value.trim() +
-                        "\n\n" +
-                        f.message.value.trim() +
-                        (link ? "\n\nDownload the update: " + link : "");
-                    document.getElementById("cpBody").dataset.copyMsg = "Message copied";
-                    sent.hidden = false;
-                    f.subject.value = "";
-                    f.message.value = "";
-                    f.download_url.value = "";
-                    count();
-                    Toon.toast("Update posted to customers");
-                    scrollTo(0, 0);
-                });
-
-                document.querySelector(".form-side").addEventListener("click", function (e) {
-                    var again = e.target.closest("[data-resend]");
-                    if (again) {
-                        sent.hidden = false;
-                        scrollTo(0, 0);
-                        return;
-                    }
-                    var del = e.target.closest("[data-del]");
-                    if (del && Toon.armed(del)) {
-                        // DEMO: Laravel deletes the update.
-                        del.closest(".row-i").remove();
-                        var n = Toon.$$(".form-side [data-del]").length;
-                        document.getElementById("nlSentCount").textContent = n + " so far";
-                        Toon.toast("Update deleted");
-                    }
-                });
-                count();
-            })();
-        </script>

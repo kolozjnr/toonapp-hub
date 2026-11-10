@@ -64,6 +64,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public Disk Quota
+    |--------------------------------------------------------------------------
+    |
+    | The storage allowance shown on the admin dashboard next to how much of
+    | the public disk (plugin covers and gallery images) is already in use.
+    |
+    */
+
+    'quota' => (int) env('STORAGE_QUOTA_GB', 10) * 1024 * 1024 * 1024,
+
+    /*
+    |--------------------------------------------------------------------------
     | Symbolic Links
     |--------------------------------------------------------------------------
     |

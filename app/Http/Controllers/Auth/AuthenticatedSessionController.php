@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,10 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Persist any guest cart into the account now that the session is
+        // authenticated, so it is always waiting on the dashboard.
+        app(CartService::class)->mergeGuestIntoUser($request->user());
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

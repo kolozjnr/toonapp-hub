@@ -48,7 +48,9 @@
                         >
                         <div class="who">
                             <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            ><span class="tx"
+                                ><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span
+                            >
                         </div>
                     </div>
                 </header>
@@ -72,7 +74,7 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Customers</div>
-                                <div class="v">6</div>
+                                <div class="v">{{ $summary['customers'] }}</div>
                                 <div class="s">Registered</div>
                             </div>
                         </div>
@@ -93,8 +95,8 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Buyers</div>
-                                <div class="v">5</div>
-                                <div class="s">Placed at least one order</div>
+                                <div class="v">{{ $summary['buyers'] }}</div>
+                                <div class="s">Completed at least one order</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -114,14 +116,14 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Newsletter</div>
-                                <div class="v">5</div>
+                                <div class="v">{{ $summary['newsletter'] }}</div>
                                 <div class="s">Subscribed</div>
                             </div>
                         </div>
                     </section>
                     <div class="toolbar">
-                        <label class="search"
-                            ><svg
+                        <form action="{{ route('admin.customers') }}" class="search" method="GET" role="search">
+                            <svg
                                 fill="none"
                                 height="16"
                                 stroke="currentColor"
@@ -130,8 +132,9 @@
                                 width="16"
                             >
                                 <circle cx="11" cy="11" r="7"></circle>
-                                <path d="m20 20-3.5-3.5"></path></svg
-                            ><input
+                                <path d="m20 20-3.5-3.5"></path>
+                            </svg>
+                            <input
                                 aria-label="Search customers"
                                 data-search="#customerRows"
                                 data-search-empty="#noResults"
@@ -140,29 +143,37 @@
                                 name="q"
                                 placeholder="Search by name, email or country"
                                 type="search"
-                                value=""
-                        /></label>
-                        <button
-                            class="btn ghost sm ml-auto"
-                            data-copy="ada@example.com, tunde@example.com, maria@example.com, liam@example.com, jon@example.com"
-                            data-copy-msg="Subscriber emails copied"
-                            id="copyAll"
-                            type="button"
-                        >
-                            <svg
-                                fill="none"
-                                height="18"
-                                stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                                width="18"
+                                value="{{ request('q') }}"
+                            />
+                        </form>
+                        <span class="note">
+                            {{ $summary['customers'] }} {{ \Illuminate\Support\Str::plural('customer', $summary['customers']) }}
+                            · {{ $summary['buyers'] }} bought
+                            · {{ $summary['newsletter'] }} subscribed
+                        </span>
+                        @if ($subscriberEmails !== '')
+                            <button
+                                class="btn ghost sm ml-auto"
+                                data-copy="{{ $subscriberEmails }}"
+                                data-copy-msg="Subscriber emails copied"
+                                id="copyAll"
+                                type="button"
                             >
-                                <rect height="12" rx="2" width="12" x="8" y="8"></rect>
-                                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg
-                            >Copy subscriber emails
-                        </button>
+                                <svg
+                                    fill="none"
+                                    height="18"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                    width="18"
+                                >
+                                    <rect height="12" rx="2" width="12" x="8" y="8"></rect>
+                                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg
+                                >Copy subscriber emails
+                            </button>
+                        @endif
                     </div>
                     <div class="tbl-wrap">
                         <table>
@@ -178,66 +189,66 @@
                                 </tr>
                             </thead>
                             <tbody id="customerRows">
-                                <tr>
-                                    <td><b>Sara Mensah</b><span class="sub">Email confirmed</span></td>
-                                    <td>sara@example.com</td>
-                                    <td>Ghana</td>
-                                    <td><span class="badge">No</span></td>
-                                    <td class="num">25 Oct 2026</td>
-                                    <td class="num">0</td>
-                                    <td class="num">$0.00</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Liam Chen</b><span class="sub">Email confirmed</span></td>
-                                    <td>liam@example.com</td>
-                                    <td>Canada</td>
-                                    <td><span class="badge ok">Yes</span></td>
-                                    <td class="num">23 Oct 2026</td>
-                                    <td class="num">1</td>
-                                    <td class="num">$19.00</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Jon Park</b><span class="sub">Email confirmed</span></td>
-                                    <td>jon@example.com</td>
-                                    <td>United States</td>
-                                    <td><span class="badge ok">Yes</span></td>
-                                    <td class="num">20 Oct 2026</td>
-                                    <td class="num">1</td>
-                                    <td class="num">$15.00</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Maria Garcia</b><span class="sub">Email confirmed</span></td>
-                                    <td>maria@example.com</td>
-                                    <td>Spain</td>
-                                    <td><span class="badge ok">Yes</span></td>
-                                    <td class="num">18 Oct 2026</td>
-                                    <td class="num">2</td>
-                                    <td class="num">$36.00</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Tunde Bello</b><span class="sub">Email confirmed</span></td>
-                                    <td>tunde@example.com</td>
-                                    <td>Nigeria</td>
-                                    <td><span class="badge ok">Yes</span></td>
-                                    <td class="num">14 Oct 2026</td>
-                                    <td class="num">1</td>
-                                    <td class="num">$44.00</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Ada Okafor</b><span class="sub">Email confirmed</span></td>
-                                    <td>ada@example.com</td>
-                                    <td>Nigeria</td>
-                                    <td><span class="badge ok">Yes</span></td>
-                                    <td class="num">9 Oct 2026</td>
-                                    <td class="num">2</td>
-                                    <td class="num">$29.00</td>
-                                </tr>
+                                @forelse ($customers as $customer)
+                                    <tr>
+                                        <td>
+                                            <b>{{ $customer->name }}</b>
+                                            <span class="sub"
+                                                >{{ $customer->email_verified_at ? 'Email confirmed' : 'Email not confirmed' }}</span
+                                            >
+                                        </td>
+                                        <td>{{ $customer->email }}</td>
+                                        <td>{{ $customer->country ?: '—' }}</td>
+                                        <td>
+                                            @if ($customer->newsletter)
+                                                <span class="badge ok">Yes</span>
+                                            @else
+                                                <span class="badge">No</span>
+                                            @endif
+                                        </td>
+                                        <td class="num">{{ $customer->created_at->format('d M Y') }}</td>
+                                        <td class="num">{{ (int) $customer->orders_count }}</td>
+                                        <td class="num">
+                                            <b>{{ \App\Models\Payment::formatAmount((int) ($customer->spent ?? 0), $currency) }}</b>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="note" colspan="7">
+                                            @if (request('q'))
+                                                No customers match your search.
+                                            @else
+                                                No customers yet. Customers appear here as soon as someone registers.
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforelse
                                 <tr data-search-ignore="" hidden="" id="noResults">
                                     <td class="note" colspan="7">No customers match your search.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    @if ($customers->hasPages())
+                        <div class="toolbar" style="margin-top: 16px;">
+                            <span class="note">
+                                Showing {{ $customers->firstItem() }}–{{ $customers->lastItem() }} of {{ $customers->total() }}
+                            </span>
+                            <div class="acts ml-auto">
+                                @if ($customers->onFirstPage())
+                                    <span class="btn xs ghost" aria-disabled="true">Previous</span>
+                                @else
+                                    <a class="btn xs ghost" href="{{ $customers->previousPageUrl() }}">Previous</a>
+                                @endif
+                                @if ($customers->hasMorePages())
+                                    <a class="btn xs ghost" href="{{ $customers->nextPageUrl() }}">Next</a>
+                                @else
+                                    <span class="btn xs ghost" aria-disabled="true">Next</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </main>
             </div>
         </div>

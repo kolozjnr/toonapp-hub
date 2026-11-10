@@ -1,7 +1,7 @@
 
     <x-app-layout>
         <div class="app">
-            @includes('layouts.customer-nav')
+            @include('layouts.admin-nav')
             <div class="app-main">
                 <header class="top">
                     <button
@@ -30,7 +30,7 @@
                         <div class="sub">Contact details, email sending, admin login and backups.</div>
                     </div>
                     <div class="top-right">
-                        <a class="btn ghost sm store-link" href="../index.html"
+                        <a class="btn ghost sm store-link" href="{{ route('home') }}"
                             ><svg
                                 fill="none"
                                 height="18"
@@ -47,7 +47,7 @@
                         >
                         <div class="who">
                             <span class="av">AD</span
-                            ><span class="tx"><b>Store admin</b><small>admin@tooabihub.com</small></span>
+                            ><span class="tx"><b>{{ auth()->user()->name }}</b><small>{{ auth()->user()->email }}</small></span>
                         </div>
                     </div>
                 </header>
@@ -60,7 +60,9 @@
                                     <p>Shown on your Contact page. Leave a field empty to hide it.</p>
                                 </div>
                             </div>
-                            <form action="settings.html" class="form" id="ciForm" method="post" novalidate="">
+                            <form action="{{ route('admin.settings.contact') }}" class="form" id="ciForm" method="post" novalidate="">
+                                @csrf
+                                @method('PUT')
                                 <div class="two">
                                     <div class="field">
                                         <label for="ciEmail">Support email</label
@@ -69,7 +71,7 @@
                                             name="support_email"
                                             placeholder="support@tooabihub.com"
                                             type="email"
-                                            value="support@tooabihub.com"
+                                            value="{{ old('support_email', $settings['support_email']) }}"
                                         />
                                     </div>
                                     <div class="field">
@@ -78,7 +80,7 @@
                                             id="ciWa"
                                             name="whatsapp"
                                             placeholder="+234 801 234 5678"
-                                            value="+234 801 234 5678"
+                                            value="{{ old('whatsapp', $settings['whatsapp']) }}"
                                         />
                                     </div>
                                 </div>
@@ -90,7 +92,7 @@
                                             name="instagram_url"
                                             placeholder="https://instagram.com/yourname"
                                             type="url"
-                                            value="https://instagram.com/toonapphub"
+                                            value="{{ old('instagram_url', $settings['instagram_url']) }}"
                                         />
                                     </div>
                                     <div class="field">
@@ -100,7 +102,7 @@
                                             name="youtube_url"
                                             placeholder="https://youtube.com/@yourchannel"
                                             type="url"
-                                            value="https://youtube.com/@toonapphub"
+                                            value="{{ old('youtube_url', $settings['youtube_url']) }}"
                                         />
                                     </div>
                                 </div>
@@ -111,7 +113,7 @@
                                         maxlength="80"
                                         name="support_hours"
                                         placeholder="Mon–Fri, 9am–6pm (WAT)"
-                                        value="Mon–Fri, 9am–6pm (WAT)"
+                                        value="{{ old('support_hours', $settings['support_hours']) }}"
                                     />
                                 </div>
                                 <span class="err" hidden="" id="ciErr"></span>
@@ -121,14 +123,21 @@
                         <section class="panel" id="email">
                             <div class="panel-h">
                                 <div>
-                                    <h2>Email sending <span class="badge warn">Not set up</span></h2>
+                                    <h2>
+                                        Email sending
+                                        <span class="badge {{ $emailReady ? 'ok' : 'warn' }}"
+                                            >{{ $emailReady ? 'Set up' : 'Not set up' }}</span
+                                        >
+                                    </h2>
                                     <p>
                                         Sends sign-up codes, password reset codes and download links, using your free
                                         EmailJS account.
                                     </p>
                                 </div>
                             </div>
-                            <form action="settings.html" class="form" id="emForm" method="post" novalidate="">
+                            <form action="{{ route('admin.settings.email') }}" class="form" id="emForm" method="post" novalidate="">
+                                @csrf
+                                @method('PUT')
                                 <div class="two">
                                     <div class="field">
                                         <label for="emKey">Public key</label
@@ -136,7 +145,7 @@
                                             id="emKey"
                                             name="emailjs_public_key"
                                             placeholder="Account → General"
-                                            value=""
+                                            value="{{ old('emailjs_public_key', $settings['emailjs_public_key']) }}"
                                         />
                                     </div>
                                     <div class="field">
@@ -145,7 +154,7 @@
                                             id="emSvc"
                                             name="emailjs_service_id"
                                             placeholder="service_ab12cd"
-                                            value=""
+                                            value="{{ old('emailjs_service_id', $settings['emailjs_service_id']) }}"
                                         />
                                     </div>
                                 </div>
@@ -156,7 +165,7 @@
                                             id="emVerify"
                                             name="template_verify"
                                             placeholder="template_verify"
-                                            value=""
+                                            value="{{ old('template_verify', $settings['template_verify']) }}"
                                         />
                                     </div>
                                     <div class="field">
@@ -165,7 +174,7 @@
                                             id="emReset"
                                             name="template_reset"
                                             placeholder="template_reset"
-                                            value=""
+                                            value="{{ old('template_reset', $settings['template_reset']) }}"
                                         />
                                     </div>
                                 </div>
@@ -175,7 +184,7 @@
                                         id="emPurchase"
                                         name="template_purchase"
                                         placeholder="template_purchase"
-                                        value=""
+                                        value="{{ old('template_purchase', $settings['template_purchase']) }}"
                                     />
                                 </div>
                                 <div class="field">
@@ -185,13 +194,21 @@
                                         name="test_email"
                                         placeholder="you@example.com"
                                         type="email"
-                                        value="support@tooabihub.com"
+                                        value="{{ old('test_email', 'support@tooabihub.com') }}"
                                     />
                                 </div>
                                 <span class="err" hidden="" id="emErr"></span>
                                 <div class="savebar">
                                     <button class="btn">Save email settings</button
-                                    ><button class="btn ghost" id="emTestBtn" type="button">Send test email</button>
+                                    ><button
+                                        class="btn ghost"
+                                        id="emTestBtn"
+                                        type="submit"
+                                        formaction="{{ route('admin.settings.email.test') }}"
+                                        formmethod="post"
+                                    >
+                                        Send test email
+                                    </button>
                                 </div>
                                 <details>
                                     <summary class="note summary-link">How to set this up</summary>
@@ -203,7 +220,7 @@
                                         <li>Copy your Public Key from Account → General.</li>
                                         <li>
                                             Create three templates (sign-up code, password reset, purchase). Set "To
-                                            Email" to {{to_email}}. The README in your site files has the exact text.
+                                            Email" to @{{to_email}}. The README in your site files has the exact text.
                                         </li>
                                         <li>Paste the IDs here, save, then send a test email.</li>
                                     </ol>
@@ -217,13 +234,17 @@
                                     <p>The email and password you use on the Log in page to reach this dashboard.</p>
                                 </div>
                             </div>
-                            <form action="settings.html" class="form" id="adForm" method="post" novalidate="">
+                            <form action="{{ route('admin.settings.login') }}" class="form" id="adForm" method="post" novalidate="">
+                                @csrf
+                                @method('PUT')
                                 <div class="field">
                                     <label for="adEmail">Admin email</label
-                                    ><input id="adEmail" name="email" type="email" value="admin@tooabihub.com" /><span
-                                        class="ferr"
-                                        data-for="adEmail"
-                                    ></span>
+                                    ><input
+                                        id="adEmail"
+                                        name="email"
+                                        type="email"
+                                        value="{{ old('email', auth()->user()->email) }}"
+                                    /><span class="ferr" data-for="adEmail"></span>
                                 </div>
                                 <div class="field">
                                     <label for="adCur">Current password</label>
@@ -292,7 +313,7 @@
                                 </div>
                             </div>
                             <div class="savebar">
-                                <button class="btn" id="bkDl" type="button">
+                                <a class="btn" href="{{ route('admin.settings.backup') }}" id="bkDl">
                                     <svg
                                         fill="none"
                                         height="18"
@@ -305,7 +326,7 @@
                                     >
                                         <path d="M12 4v11m-5-5 5 5 5-5"></path>
                                         <path d="M4 19h16"></path></svg
-                                    >Download backup</button
+                                    >Download backup</a
                                 ><button class="btn ghost" id="bkUp" type="button">
                                     <svg
                                         fill="none"
@@ -320,13 +341,21 @@
                                         <path d="M12 16V4m-5 5 5-5 5 5"></path>
                                         <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path></svg
                                     >Restore from backup</button
-                                ><input
-                                    accept="application/json,.json"
+                                ><form
+                                    action="{{ route('admin.settings.restore') }}"
+                                    enctype="multipart/form-data"
                                     hidden=""
-                                    id="bkFile"
-                                    name="backup"
-                                    type="file"
-                                />
+                                    id="bkForm"
+                                    method="post"
+                                >
+                                    @csrf
+                                    <input
+                                        accept="application/json,.json"
+                                        id="bkFile"
+                                        name="backup"
+                                        type="file"
+                                    />
+                                </form>
                             </div>
                             <p class="note note-spaced">
                                 Restoring replaces the plugins, customers, orders and settings with the ones in the
@@ -338,77 +367,93 @@
             </div>
         </div>
        
+        @push('scripts')
+            <script>
+                /* Admin settings: check each panel before it posts to Laravel. */
+                (function () {
+                    "use strict";
+
+                    var ci = document.getElementById("ciForm");
+                    ci.addEventListener("submit", function (e) {
+                        var f = ci.elements,
+                            err = document.getElementById("ciErr");
+                        Toon.showErr(err, "");
+                        if (f.support_email.value.trim() && !Toon.emailOk(f.support_email.value.trim())) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "That email doesn't look right.");
+                        }
+                        if (f.whatsapp.value.trim() && f.whatsapp.value.replace(/\D/g, "").length < 8) {
+                            e.preventDefault();
+                            return Toon.showErr(
+                                err,
+                                "Add the WhatsApp number with country code, like +234 801 234 5678.",
+                            );
+                        }
+                        if (f.instagram_url.value.trim() && !Toon.linkOk(f.instagram_url.value.trim())) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "The Instagram link should start with https://");
+                        }
+                        if (f.youtube_url.value.trim() && !Toon.linkOk(f.youtube_url.value.trim())) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "The YouTube link should start with https://");
+                        }
+                    });
+
+                    var em = document.getElementById("emForm");
+                    em.addEventListener("submit", function (e) {
+                        var err = document.getElementById("emErr");
+                        Toon.showErr(err, "");
+                        var testing = e.submitter && e.submitter.id === "emTestBtn";
+                        if (testing && !Toon.emailOk(em.elements.test_email.value.trim())) {
+                            e.preventDefault();
+                            Toon.showErr(err, "Enter the email address to send the test to.");
+                        }
+                    });
+
+                    var ad = document.getElementById("adForm");
+                    ad.addEventListener("submit", function (e) {
+                        var f = ad.elements,
+                            nw = f.password.value;
+                        var ok = Toon.fieldErr("adEmail", Toon.emailOk(f.email.value.trim()) ? "" : "Enter a valid email.");
+                        ok = Toon.fieldErr("adCur", f.current_password.value ? "" : "Enter your current password.") && ok;
+                        ok = Toon.fieldErr("adNew", nw ? Toon.passwordRule(nw) : "") && ok;
+                        ok =
+                            Toon.fieldErr(
+                                "adNew2",
+                                nw && f.password_confirmation.value !== nw ? "Passwords don't match." : "",
+                            ) && ok;
+                        if (!ok) e.preventDefault();
+                    });
+
+                    var file = document.getElementById("bkFile");
+                    document.getElementById("bkUp").addEventListener("click", function () {
+                        file.click();
+                    });
+                    file.addEventListener("change", function () {
+                        var chosen = file.files[0];
+                        if (!chosen) return;
+                        if (!/\.json$/i.test(chosen.name)) {
+                            file.value = "";
+                            return Toon.toast("Choose a JSON backup file.");
+                        }
+                        var sure = window.confirm(
+                            "Restoring replaces the plugins, customers and orders in this store with the ones in this file. Continue?",
+                        );
+                        if (!sure) {
+                            file.value = "";
+                            return;
+                        }
+                        document.getElementById("bkForm").submit();
+                    });
+
+                    if (location.hash) {
+                        var target = document.querySelector(location.hash);
+                        if (target)
+                            setTimeout(function () {
+                                target.scrollIntoView();
+                            }, 50);
+                    }
+                })();
+            </script>
+        @endpush
     </x-app-layout>
-        <script>
-            /* Admin settings: contact details, email sending, admin login, backup. */
-            (function () {
-                "use strict";
-                var ci = document.getElementById("ciForm");
-                ci.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    var f = ci.elements,
-                        err = document.getElementById("ciErr");
-                    Toon.showErr(err, "");
-                    if (f.support_email.value.trim() && !Toon.emailOk(f.support_email.value.trim()))
-                        return Toon.showErr(err, "That email doesn't look right.");
-                    if (f.whatsapp.value.trim() && f.whatsapp.value.replace(/\D/g, "").length < 8)
-                        return Toon.showErr(err, "Add the WhatsApp number with country code, like +234 801 234 5678.");
-                    if (f.instagram_url.value.trim() && !Toon.linkOk(f.instagram_url.value.trim()))
-                        return Toon.showErr(err, "The Instagram link should start with https://");
-                    if (f.youtube_url.value.trim() && !Toon.linkOk(f.youtube_url.value.trim()))
-                        return Toon.showErr(err, "The YouTube link should start with https://");
-                    Toon.toast("Contact details saved"); // DEMO: Laravel saves the settings.
-                });
-
-                var em = document.getElementById("emForm");
-                em.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    Toon.toast("Email settings saved"); // DEMO: Laravel saves the settings.
-                });
-                document.getElementById("emTestBtn").addEventListener("click", function () {
-                    var to = em.elements.test_email.value.trim(),
-                        err = document.getElementById("emErr");
-                    if (!Toon.emailOk(to)) return Toon.showErr(err, "Enter the email address to send the test to.");
-                    Toon.showErr(err, "");
-                    Toon.toast("Test email sent to " + to + ". Check your inbox."); // DEMO: Laravel sends the test email.
-                });
-
-                var ad = document.getElementById("adForm");
-                ad.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    var f = ad.elements,
-                        nw = f.password.value;
-                    var ok = Toon.fieldErr("adEmail", Toon.emailOk(f.email.value.trim()) ? "" : "Enter a valid email.");
-                    ok = Toon.fieldErr("adCur", f.current_password.value ? "" : "Enter your current password.") && ok;
-                    ok = Toon.fieldErr("adNew", nw ? Toon.passwordRule(nw) : "") && ok;
-                    ok =
-                        Toon.fieldErr(
-                            "adNew2",
-                            nw && f.password_confirmation.value !== nw ? "Passwords don't match." : "",
-                        ) && ok;
-                    if (!ok) return;
-                    f.current_password.value = f.password.value = f.password_confirmation.value = "";
-                    Toon.toast("Admin login updated"); // DEMO: Laravel checks and saves the admin login.
-                });
-
-                document.getElementById("bkDl").addEventListener("click", function () {
-                    Toon.toast("Preparing your backup…"); // DEMO: Laravel builds and downloads the backup file.
-                });
-                var file = document.getElementById("bkFile");
-                document.getElementById("bkUp").addEventListener("click", function () {
-                    file.click();
-                });
-                file.addEventListener("change", function () {
-                    if (file.files[0]) Toon.toast("Restoring " + file.files[0].name + "…"); // DEMO: Laravel restores the backup.
-                    file.value = "";
-                });
-
-                if (location.hash) {
-                    var target = document.querySelector(location.hash);
-                    if (target)
-                        setTimeout(function () {
-                            target.scrollIntoView();
-                        }, 50);
-                }
-            })();
-        </script>

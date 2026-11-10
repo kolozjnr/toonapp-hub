@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\CartService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -59,9 +61,14 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        $user->assignRole(Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']));
+
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Keep any guest cart attached to the new account.
+        app(CartService::class)->mergeGuestIntoUser($user);
 
         return redirect(route('dashboard', absolute: false));
     }

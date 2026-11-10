@@ -1,11 +1,9 @@
 /* ==========================================================================
    ToonApp Hub · store.js
-   Shared behaviour for the public store pages: the cart drawer and the
-   "Add to cart" buttons. The drawer markup and the cart row <template>
-   are written in each page's HTML; this file only shows, hides, clones
-   and updates them.
-   In Laravel the cart lives on the server: replace the add/remove parts
-   with form posts or fetch() calls to your cart routes.
+   Shared behaviour for the public store pages: the cart drawer, the
+   "Add to cart" buttons and calling the server cart routes. The cart
+   lives on the server (guest cart token cookie / user account), so it
+   persists across pages and shows up in the customer dashboard.
    ========================================================================== */
 (function () {
     "use strict";
@@ -16,6 +14,25 @@
     if (!drawer) return;
     var body = $("#cartBody"),
         tpl = $("#cartItemTemplate");
+
+    var urls = {
+        items: document.body.getAttribute("data-cart-items") || "/cart/items",
+        add: document.body.getAttribute("data-cart-add") || "/cart/add",
+        remove: document.body.getAttribute("data-cart-remove") || "/cart/remove",
+    };
+
+    function csrf() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute("content") : "";
+    }
+
+    function money(n) {
+        n = Number(n) || 0;
+        if (!n) return "Free";
+        return "$" + (n % 1 ? n.toFixed(2) : String(n));
+    }
+
+    var items = [];
 
     /* ---------- open / close ---------- */
     function openCart() {
@@ -40,58 +57,109 @@
         if (e.key === "Escape") closeCart();
     });
 
-    /* ---------- totals, counts and empty state ---------- */
-    function items() {
-        return $$("[data-cart-item]", body);
-    }
-    function refresh() {
-        var list = items();
-        var total = list.reduce(function (sum, row) {
-            return sum + (parseFloat(row.dataset.price) || 0);
-        }, 0);
-        $$("#cartBtn .cart-n").forEach(function (n) {
-            n.textContent = String(list.length);
-        });
-        var totalEl = $("#cartTotal");
-        if (totalEl) totalEl.textContent = Toon.money(total);
-        $("#cartEmpty").hidden = list.length > 0;
-        $("#cartFoot").hidden = list.length === 0;
-        $("#cartFootEmpty").hidden = list.length > 0;
-    }
+    /* ---------- render ---------- */
     function inCart(id) {
-        return !!body.querySelector('[data-cart-item="' + CSS.escape(id) + '"]');
+        return items.some(function (p) {
+            return String(p.plugin_id) === String(id);
+        });
     }
     Toon.inCart = inCart;
 
-    /* Button labels: each [data-add] button carries data-in-label / data-out-label. */
-    function syncButtons(id) {
-        $$('[data-add="' + CSS.escape(id) + '"]').forEach(function (btn) {
-            var on = inCart(id);
-            btn.classList.toggle("in", on && !btn.hasAttribute("data-open-cart"));
-            btn.textContent = on ? btn.dataset.inLabel : btn.dataset.outLabel;
+    function syncButtons() {
+        $$("[data-add]").forEach(function (btn) {
+            var on = inCart(btn.dataset.add);
+            var opensCart = btn.hasAttribute("data-open-cart");
+            btn.classList.toggle("in", on && !opensCart);
+            btn.textContent = on
+                ? btn.dataset.inLabel || "✓ In cart"
+                : btn.dataset.outLabel || "Add to cart";
         });
     }
 
-    /* ---------- add (clone the row template) ---------- */
-    Toon.addToCart = function (p) {
-        if (inCart(p.id)) return false;
-        var row = tpl.content.firstElementChild.cloneNode(true);
-        row.dataset.cartItem = p.id;
-        row.dataset.price = p.price;
-        row.querySelector("a.th").href = p.url;
-        var img = row.querySelector("img");
-        img.src = p.image;
-        row.querySelector("b").textContent = p.name;
-        row.querySelector("small").textContent = p.category;
-        row.querySelector("[data-rm]").dataset.rm = p.id;
-        row.querySelector(".p").textContent = Toon.money(p.price);
-        body.insertBefore(row, $("#cartEmpty"));
-        refresh();
-        syncButtons(p.id);
-        return true;
-    };
+    function ensureEmpty() {
+        var empty = $("#cartEmpty");
+        if (!empty) {
+            empty = document.createElement("div");
+            empty.className = "empty flat";
+            empty.id = "cartEmpty";
+            empty.innerHTML = '<h3>Cart\'s empty</h3><p>Add a plugin and it\'ll wait here for you.</p>';
+            body.appendChild(empty);
+        }
+        return empty;
+    }
 
-    /* Any button with data-add="id" inside an element with data-id/data-name/... */
+    function refresh() {
+        var count = items.length;
+        $$(".cart-n").forEach(function (n) {
+            n.textContent = String(count);
+        });
+        var total = items.reduce(function (sum, p) {
+            return sum + (Number(p.price) || 0);
+        }, 0);
+        var totalEl = $("#cartTotal");
+        if (totalEl) totalEl.textContent = money(total);
+        ensureEmpty().hidden = count > 0;
+        var foot = $("#cartFoot");
+        if (foot) foot.hidden = count === 0;
+        var footEmpty = $("#cartFootEmpty");
+        if (footEmpty) footEmpty.hidden = count > 0;
+        syncButtons();
+    }
+
+    function renderRows() {
+        $$("[data-cart-item]", body).forEach(function (row) {
+            row.remove();
+        });
+        var empty = ensureEmpty();
+        items.forEach(function (p) {
+            if (!tpl) return;
+            var row = tpl.content.firstElementChild.cloneNode(true);
+            row.dataset.cartItem = p.plugin_id;
+            row.dataset.price = p.price;
+            var link = row.querySelector("a.th");
+            if (link) link.href = p.url;
+            var img = row.querySelector("img");
+            if (img) {
+                img.src = p.image;
+                img.alt = p.name;
+            }
+            row.querySelector("b").textContent = p.name;
+            row.querySelector("small").textContent = p.category;
+            var rm = row.querySelector("[data-rm]");
+            if (rm) rm.dataset.rm = p.plugin_id;
+            row.querySelector(".p").textContent = p.price_label;
+            body.insertBefore(row, empty || null);
+        });
+        refresh();
+    }
+
+    /* ---------- fetch from the server cart ---------- */
+    function request(path, method, data, onDone) {
+        return fetch(path, {
+            method: method || "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrf(),
+            },
+            body: data ? JSON.stringify(data) : undefined,
+            credentials: "same-origin",
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error("Cart request failed: " + response.status);
+                return response.json();
+            })
+            .then(function (payload) {
+                items = payload.items || [];
+                renderRows();
+                if (onDone) onDone(payload);
+            })
+            .catch(function () {
+                Toon.toast("The cart couldn't be updated. Check your connection and try again.");
+            });
+    }
+
+    /* ---------- add to cart ---------- */
     document.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-add]");
         if (!btn) return;
@@ -100,25 +168,41 @@
             openCart();
             return;
         }
-        var info =
-            btn.closest("[data-product]") || document.querySelector('[data-product][data-id="' + CSS.escape(id) + '"]');
-        if (!info) return;
-        var d = info.dataset;
-        Toon.addToCart({ id: id, name: d.name, category: d.category, price: d.price, image: d.image, url: d.url });
-        Toon.toast(d.name + " added to cart");
+        var host = btn.closest("[data-product]");
+        var name = host && host.dataset.name ? host.dataset.name : "Plugin";
+        request(urls.add, "POST", { plugin_id: Number(id) }, function () {
+            Toon.toast(name + " added to cart");
+        });
         if (btn.hasAttribute("data-open-cart")) openCart();
     });
 
-    /* ---------- remove ---------- */
+    /* ---------- remove from cart ---------- */
     drawer.addEventListener("click", function (e) {
         var rm = e.target.closest("[data-rm]");
         if (!rm) return;
-        var row = rm.closest("[data-cart-item]");
-        var id = row.dataset.cartItem;
-        row.remove();
-        refresh();
-        syncButtons(id);
+        request(urls.remove, "POST", { plugin_id: Number(rm.dataset.rm) });
     });
 
+    /* ---------- initial state ---------- */
+    /* The drawer is server-rendered, so parse whatever rows are present,
+       then re-sync from the server (source of truth). */
+    $$("[data-cart-item]", body).forEach(function (row) {
+        var b = row.querySelector("b"),
+            small = row.querySelector("small"),
+            priceEl = row.querySelector(".p"),
+            link = row.querySelector("a.th"),
+            img = row.querySelector("img");
+        items.push({
+            id: null,
+            plugin_id: Number(row.dataset.cartItem),
+            name: b ? b.textContent : "",
+            category: small ? small.textContent : "Plugin",
+            price: Number(row.dataset.price) || 0,
+            price_label: priceEl ? priceEl.textContent : "",
+            url: link ? link.href : "",
+            image: img ? img.src : "",
+        });
+    });
     refresh();
+    request(urls.items, "GET", null);
 })();

@@ -101,8 +101,15 @@
                                 ></path>
                             </svg>
                             <div>
-                                <h2><span data-greeting="">Hello</span>, Ada 👋</h2>
-                                <p>You own 2 plugins. Download them any time from My plugins.</p>
+                                <h2><span data-greeting="">Hello</span>, {{ $firstName }} 👋</h2>
+                                <p>
+                                    @if ($ownedCount > 0)
+                                        You own {{ $ownedCount }} {{ \Illuminate\Support\Str::plural('plugin', $ownedCount) }}.
+                                        Download them any time from My plugins.
+                                    @else
+                                        You don't own any plugins yet. Grab one from the shop and it will show up here.
+                                    @endif
+                                </p>
                             </div>
                         </div>
                         <a class="btn white" href="{{ route('customer.plugins') }}">Go to My plugins</a>
@@ -125,8 +132,8 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Plugins owned</div>
-                                <div class="v">2</div>
-                                <div class="s">Ready to download</div>
+                                <div class="v">{{ $ownedCount }}</div>
+                                <div class="s">{{ $ownedCount > 0 ? 'Ready to download' : 'Nothing owned yet' }}</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -146,8 +153,8 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Orders</div>
-                                <div class="v">2</div>
-                                <div class="s">Last on 26 Oct 2026</div>
+                                <div class="v">{{ $summary['orders'] }}</div>
+                                <div class="s">{{ $summary['last_order_at'] ? 'Last on '.$summary['last_order_at']->format('d M Y') : 'No orders yet' }}</div>
                             </div>
                         </div>
                         <div class="kpi">
@@ -168,12 +175,12 @@
                             ></span>
                             <div class="min-w-0">
                                 <div class="k">Total spent</div>
-                                <div class="v">$29.00</div>
+                                <div class="v">{{ $summary['spent_label'] }}</div>
                                 <div class="s">All time</div>
                             </div>
                         </div>
                         <div class="kpi">
-                            <span class="ic bad"
+                            <span class="ic"
                                 ><svg
                                     fill="none"
                                     height="18"
@@ -188,11 +195,54 @@
                                     <path d="M10 20a2.2 2.2 0 0 0 4 0"></path></svg
                             ></span>
                             <div class="min-w-0">
-                                <div class="k">Unread updates</div>
-                                <div class="v">2</div>
-                                <div class="s">3 in total</div>
+                                <div class="k">Updated recently</div>
+                                <div class="v">{{ $recentlyUpdated }}</div>
+                                <div class="s">In the last 30 days</div>
                             </div>
                         </div>
+                    </section>
+                    <section class="panel" id="cart">
+                        <div class="panel-h">
+                            <div>
+                                <h2>Your cart</h2>
+                                <p>Plugins waiting for checkout — pay securely with Paystack.</p>
+                            </div>
+                            <a class="btn ghost sm" href="{{ route('home') }}#shop">Continue shopping</a>
+                        </div>
+                        @if (count($cartItems))
+                            <div class="list">
+                                @foreach ($cartItems as $item)
+                                    <div class="row-i">
+                                        <span class="thumb"><img alt="" src="{{ $item['image'] }}" /></span>
+                                        <div class="grow">
+                                            <b><a class="plain-link" href="{{ $item['url'] }}">{{ $item['name'] }}</a></b>
+                                            <small>{{ $item['category'] }}</small>
+                                        </div>
+                                        <div class="acts align-left">
+                                            <b class="price">{{ $item['price_label'] }}</b>
+                                            <form method="POST" action="{{ route('cart.remove') }}">
+                                                @csrf
+                                                <input type="hidden" name="plugin_id" value="{{ $item['plugin_id'] }}" />
+                                                <button class="btn xs danger" type="submit">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endforeach
+                                <div class="row-i" style="border-top:1px solid var(--line, rgba(255,255,255,.08)); padding-top:16px">
+                                    <div class="grow"><b>Total</b></div>
+                                    <div class="acts align-left">
+                                        <b class="price">{{ '$'.number_format((float) $cartTotal, fmod((float) $cartTotal, 1.0) > 0 ? 2 : 0) }}</b>
+                                        <a class="btn pink" href="{{ route('checkout.create') }}">Pay now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="empty">
+                                <h3>Your cart is empty</h3>
+                                <p>Add a plugin from the shop and it will show up here and in the cart drawer.</p>
+                                <a class="btn" href="{{ route('home') }}#shop">Browse plugins</a>
+                            </div>
+                        @endif
                     </section>
                     <div class="grid2">
                         <section class="panel">
@@ -204,60 +254,49 @@
                                 <a class="btn ghost sm" href="{{ route('customer.plugins') }}">View all</a>
                             </div>
                             <div class="list" id="recent">
-                                <div class="row-i">
-                                    <span class="thumb"
-                                        ><img alt="" src="../assets/images/plugins/bounce-presets.png"
-                                    /></span>
-                                    <div class="grow">
-                                        <b>Bounce Presets</b><small>v1.0.0 · Bought 26 Oct 2026</small>
+                                @forelse ($recentPlugins as $plugin)
+                                    <div class="row-i">
+                                        <span class="thumb"
+                                            ><img alt="" src="{{ $plugin['cover'] }}"
+                                        /></span>
+                                        <div class="grow">
+                                            <b>{{ $plugin['name'] }}</b
+                                            ><small
+                                                >{{ $plugin['version'] ? 'v'.$plugin['version'].' · ' : '' }}Bought
+                                                {{ $plugin['bought_at']->format('d M Y') }}</small
+                                            >
+                                        </div>
+                                        @if ($plugin['download_url'])
+                                            <a
+                                                class="btn sm"
+                                                href="{{ $plugin['download_url'] }}"
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                                ><svg
+                                                    fill="none"
+                                                    height="18"
+                                                    stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    viewBox="0 0 24 24"
+                                                    width="18"
+                                                >
+                                                    <path d="M12 4v11m-5-5 5 5 5-5"></path>
+                                                    <path d="M4 19h16"></path></svg
+                                                >Download</a
+                                            >
+                                        @elseif ($plugin['url'])
+                                            <a class="btn sm ghost" href="{{ $plugin['url'] }}">View plugin</a>
+                                        @endif
                                     </div>
-                                    <a
-                                        class="btn sm"
-                                        href="https://drive.google.com/file/d/example-bounce"
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                        ><svg
-                                            fill="none"
-                                            height="18"
-                                            stroke="currentColor"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            viewBox="0 0 24 24"
-                                            width="18"
-                                        >
-                                            <path d="M12 4v11m-5-5 5 5 5-5"></path>
-                                            <path d="M4 19h16"></path></svg
-                                        >Download</a
-                                    >
-                                </div>
-                                <div class="row-i">
-                                    <span class="thumb"
-                                        ><img alt="" src="../assets/images/plugins/squash-stretch-pro.png"
-                                    /></span>
-                                    <div class="grow">
-                                        <b>Squash &amp; Stretch Pro</b><small>v1.4.0 · Bought 17 Oct 2026</small>
+                                @empty
+                                    <div class="empty">
+                                        <h3>No plugins yet</h3>
+                                        <p>Buy a plugin and it lands here with its download link.</p>
+                                        <a class="btn" href="{{ route('home') }}#shop">Browse plugins</a>
                                     </div>
-                                    <a
-                                        class="btn sm"
-                                        href="https://drive.google.com/file/d/example-squash"
-                                        rel="noopener noreferrer"
-                                        target="_blank"
-                                        ><svg
-                                            fill="none"
-                                            height="18"
-                                            stroke="currentColor"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            viewBox="0 0 24 24"
-                                            width="18"
-                                        >
-                                            <path d="M12 4v11m-5-5 5 5 5-5"></path>
-                                            <path d="M4 19h16"></path></svg
-                                        >Download</a
-                                    >
-                                </div>
+                                @endforelse
                             </div>
                         </section>
                         <section class="panel">
@@ -269,36 +308,23 @@
                                 <a class="btn ghost sm" href="{{ route('customer.updates') }}">View all</a>
                             </div>
                             <div class="list">
-                                <div class="row-i">
-                                    <span class="badge brand">New</span>
-                                    <div class="grow">
-                                        <b>New: Smear Frames just landed</b
-                                        ><small
-                                            >Our newest script draws cartoon smear frames from your motion path. It's in
-                                            the shop now w…</small
+                                @forelse ($updates as $update)
+                                    <div class="row-i">
+                                        <span class="badge brand"
+                                            >{{ $update['version'] ? 'v'.$update['version'] : 'Update' }}</span
                                         >
+                                        <div class="grow">
+                                            <b>{{ $update['name'] }}</b
+                                            ><small
+                                                >Updated {{ $update['updated_at']->format('d M Y') }}{{
+                                                    $update['tagline'] ? ' · '.\Illuminate\Support\Str::limit($update['tagline'], 80) : ''
+                                                }}</small
+                                            >
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row-i">
-                                    <span class="badge brand">New</span>
-                                    <div class="grow">
-                                        <b>Squash &amp; Stretch Pro 1.4 is out</b
-                                        ><small
-                                            >Version 1.4 adds character presets and a new overshoot slider, and fixes a
-                                            bug with 3D lay…</small
-                                        >
-                                    </div>
-                                </div>
-                                <div class="row-i">
-                                    <span class="badge plain">19 Oct 2026</span>
-                                    <div class="grow">
-                                        <b>Spring sale: 25% off Squash &amp; Stretch Pro</b
-                                        ><small
-                                            >For one week only, Squash &amp; Stretch Pro is 25% off. The price drops
-                                            automatically at check…</small
-                                        >
-                                    </div>
-                                </div>
+                                @empty
+                                    <div class="note">Updates for the plugins you own show up here.</div>
+                                @endforelse
                             </div>
                         </section>
                     </div>
@@ -311,36 +337,28 @@
                             <a class="btn ghost sm" href="{{ route('home') }}#shop">Visit the shop</a>
                         </div>
                         <div class="ptiles" id="recs">
-                            <article class="ptile">
-                                <a class="pc" href="{{ route('home') }}#shop"
-                                    ><img alt="" src="../assets/images/plugins/smear-frames.png"
-                                /></a>
-                                <div class="pb">
-                                    <h3>Smear Frames</h3>
-                                    <span class="meta">Script · $19</span>
-                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
-                                </div>
-                            </article>
-                            <article class="ptile">
-                                <a class="pc" href="{{ route('home') }}#shop"
-                                    ><img alt="" src="../assets/images/plugins/line-boil-fx.png"
-                                /></a>
-                                <div class="pb">
-                                    <h3>Line Boil FX</h3>
-                                    <span class="meta">Plugin · $15</span>
-                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
-                                </div>
-                            </article>
-                            <article class="ptile">
-                                <a class="pc" href="{{ route('home') }}#shop"
-                                    ><img alt="" src="../assets/images/plugins/toon-shadows.png"
-                                /></a>
-                                <div class="pb">
-                                    <h3>Toon Shadows</h3>
-                                    <span class="meta">Plugin · $24</span>
-                                    <div class="pa"><a class="btn sm ghost" href="{{ route('home') }}#shop">View plugin</a></div>
-                                </div>
-                            </article>
+                            @forelse ($recommendations as $plugin)
+                                <article class="ptile">
+                                    <a class="pc" href="{{ route('plugins.show', $plugin->slug) }}"
+                                        ><img
+                                            alt=""
+                                            src="{{ $plugin->coverUrl() ?: asset('assets/images/logo.png') }}"
+                                    /></a>
+                                    <div class="pb">
+                                        <h3>{{ $plugin->name }}</h3>
+                                        <span class="meta"
+                                            >{{ $plugin->category ? $plugin->category.' · ' : '' }}{{ $plugin->priceLabel() }}</span
+                                        >
+                                        <div class="pa">
+                                            <a class="btn sm ghost" href="{{ route('plugins.show', $plugin->slug) }}"
+                                                >View plugin</a
+                                            >
+                                        </div>
+                                    </div>
+                                </article>
+                            @empty
+                                <div class="note">You already own every plugin in the shop.</div>
+                            @endforelse
                         </div>
                     </section>
                 </main>

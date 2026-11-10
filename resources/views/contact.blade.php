@@ -1,7 +1,7 @@
 <x-guest-layout>
         <main class="wrap">
             <div class="contact-head">
-                <a class="btn sm white" href="index.html"
+                <a class="btn sm white" href="{{ route('home') }}"
                     ><svg
                         fill="none"
                         height="16"
@@ -21,10 +21,25 @@
                     within a day.
                 </p>
             </div>
+            @php
+                $supportEmail = trim((string) $settings['support_email']);
+                $whatsapp = trim((string) $settings['whatsapp']);
+                $whatsappDigits = preg_replace('/\D/', '', $whatsapp);
+                $instagram = trim((string) $settings['instagram_url']);
+                $youtube = trim((string) $settings['youtube_url']);
+                $supportHours = trim((string) $settings['support_hours']);
+                $hasContactDetails = filled($supportEmail)
+                    || $whatsappDigits !== ''
+                    || filled($instagram)
+                    || filled($youtube)
+                    || filled($supportHours);
+            @endphp
             <section class="contact" id="contact">
+                @if ($hasContactDetails)
                 <div class="contact-info">
                     <h2 class="fs-28">Reach us directly</h2>
                     <div class="ccards" id="contactCards">
+                        @if (filled($supportEmail))
                         <div class="ccard">
                             <span class="ic bg-yellow"
                                 ><svg
@@ -38,17 +53,19 @@
                                 >
                                     <rect height="14" rx="2" width="18" x="3" y="5"></rect>
                                     <path d="m4 7 8 6 8-6"></path></svg></span
-                            ><span class="tx"><small>Email</small><span class="v">support@tooabihub.com</span></span
+                            ><span class="tx"><small>Email</small><span class="v">{{ $supportEmail }}</span></span
                             ><button
                                 class="btn xs white"
-                                data-copy="support@tooabihub.com"
+                                data-copy="{{ $supportEmail }}"
                                 data-copy-msg="Email copied"
                                 type="button"
                             >
                                 Copy
                             </button>
                         </div>
-                        <a class="ccard" href="https://wa.me/2348012345678" rel="noopener noreferrer" target="_blank"
+                        @endif
+                        @if ($whatsappDigits !== '')
+                        <a class="ccard" href="https://wa.me/{{ $whatsappDigits }}" rel="noopener noreferrer" target="_blank"
                             ><span class="ic bg-mint"
                                 ><svg
                                     fill="none"
@@ -64,10 +81,13 @@
                                         d="M9 9.5c.5 2.5 2.5 4.5 5 5l1.2-1.3 2 1-.5 1.6c-4 .4-8.4-4-8-8l1.6-.5 1 2z"
                                         stroke-width="1.6"
                                     ></path></svg></span
-                            ><span class="tx"><small>WhatsApp</small><span class="v">+234 801 234 5678</span></span></a
-                        ><a
+                            ><span class="tx"><small>WhatsApp</small><span class="v">{{ $whatsapp }}</span></span></a
+                        >
+                        @endif
+                        @if (filled($instagram))
+                        <a
                             class="ccard"
-                            href="https://instagram.com/toonapphub"
+                            href="{{ $instagram }}"
                             rel="noopener noreferrer"
                             target="_blank"
                             ><span class="ic bg-pink"
@@ -83,11 +103,14 @@
                                     <circle cx="12" cy="12" r="4"></circle>
                                     <circle cx="17.3" cy="6.7" fill="currentColor" r="1"></circle></svg></span
                             ><span class="tx"
-                                ><small>Instagram</small><span class="v">instagram.com/toonapphub</span></span
+                                ><small>Instagram</small><span class="v">{{ preg_replace('#^https?://(www\.)?#', '', $instagram) }}</span></span
                             ></a
-                        ><a
+                        >
+                        @endif
+                        @if (filled($youtube))
+                        <a
                             class="ccard"
-                            href="https://youtube.com/@toonapphub"
+                            href="{{ $youtube }}"
                             rel="noopener noreferrer"
                             target="_blank"
                             ><span class="ic bg-red"
@@ -106,6 +129,8 @@
                                 ><small>YouTube</small><span class="v">Watch all our tutorials</span></span
                             ></a
                         >
+                        @endif
+                        @if (filled($supportHours))
                         <div class="ccard">
                             <span class="ic bg-soft"
                                 ><svg
@@ -120,16 +145,32 @@
                                     <circle cx="12" cy="12" r="8.5"></circle>
                                     <path d="M12 7.5V12l3 2"></path></svg></span
                             ><span class="tx"
-                                ><small>Support hours</small><span class="v">Mon–Fri, 9am–6pm (WAT)</span></span
+                                ><small>Support hours</small><span class="v">{{ $supportHours }}</span></span
                             >
                         </div>
+                        @endif
                     </div>
                 </div>
-                <form action="contact.html" class="panel2 form" id="contactForm" method="post" novalidate="">
+                @endif
+                <form
+                    action="{{ route('contact.store') }}"
+                    class="panel2 form"
+                    id="contactForm"
+                    method="post"
+                    novalidate=""
+                    @unless ($hasContactDetails) style="grid-column: 1 / -1;" @endunless
+                >
+                    @csrf
                     <div class="two">
                         <div class="field">
                             <label for="cName">Name</label
-                            ><input autocomplete="name" id="cName" maxlength="80" name="name" />
+                            ><input
+                                autocomplete="name"
+                                id="cName"
+                                maxlength="80"
+                                name="name"
+                                value="{{ old('name') }}"
+                            />
                         </div>
                         <div class="field">
                             <label for="cEmail">Email</label
@@ -140,16 +181,16 @@
                                 name="email"
                                 placeholder="you@example.com"
                                 type="email"
+                                value="{{ old('email') }}"
                             />
                         </div>
                     </div>
                     <div class="field">
                         <label for="cTopic">Topic</label
                         ><select id="cTopic" name="topic">
-                            <option>Question about a plugin</option>
-                            <option>Help with a purchase or download</option>
-                            <option>Feature request</option>
-                            <option>Something else</option>
+                            @foreach (\App\Models\Message::TOPICS as $topic)
+                                <option @selected(old('topic') === $topic)>{{ $topic }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="field">
@@ -160,7 +201,7 @@
                             maxlength="2000"
                             name="message"
                             placeholder="How can we help?"
-                        ></textarea>
+                        >{{ old('message') }}</textarea>
                     </div>
                     <span class="err" hidden="" id="cErr"></span>
                     <button class="btn pink" id="cSend">Send message</button>
@@ -169,7 +210,7 @@
         </main>
         <footer class="site-foot">
             <div class="wrap foot-in">
-                <span>© 2026 ToonApp Hub</span><span><a href="contact.html">Contact us</a> · Made for animators</span>
+                <span>© 2026 ToonApp Hub</span><span><a href="{{ route('contact') }}">Contact us</a> · Made for animators</span>
             </div>
         </footer>
         <div class="scrim" id="cartScrim"></div>
@@ -314,25 +355,32 @@
                 </g>
             </svg>
         </div>
-</x-guest-layout>
-        <script>
-            /* Contact page: check the message form before it is sent. */
-            (function () {
-                "use strict";
-                var form = document.getElementById("contactForm");
-                var err = document.getElementById("cErr");
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    var name = form.elements.name.value.trim();
-                    var email = form.elements.email.value.trim();
-                    var text = form.elements.message.value.trim();
-                    Toon.showErr(err, "");
-                    if (!name) return Toon.showErr(err, "Add your name.");
-                    if (!Toon.emailOk(email)) return Toon.showErr(err, "Add a valid email so we can reply.");
-                    if (text.length < 5) return Toon.showErr(err, "Write your message.");
-                    // DEMO: Laravel will store the message and email the admin when this form posts.
-                    form.elements.message.value = "";
-                    Toon.toast("Message sent! We'll reply by email.");
-                });
-            })();
-        </script>
+        @push('scripts')
+            <script>
+                /* Contact page: check the message form before it posts to Laravel. */
+                (function () {
+                    "use strict";
+                    var form = document.getElementById("contactForm");
+                    var err = document.getElementById("cErr");
+                    form.addEventListener("submit", function (e) {
+                        var name = form.elements.name.value.trim();
+                        var email = form.elements.email.value.trim();
+                        var text = form.elements.message.value.trim();
+                        Toon.showErr(err, "");
+                        if (!name) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "Add your name.");
+                        }
+                        if (!Toon.emailOk(email)) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "Add a valid email so we can reply.");
+                        }
+                        if (text.length < 5) {
+                            e.preventDefault();
+                            return Toon.showErr(err, "Write your message.");
+                        }
+                    });
+                })();
+            </script>
+        @endpush
+    </x-guest-layout>

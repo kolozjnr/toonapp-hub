@@ -4,11 +4,7 @@
     $isCustomer = $navUser?->hasRole('user') ?? false;
 
     $pluginCount = $isAdmin ? \App\Models\Plugin::query()->count() : null;
-    $customerCount = $isAdmin
-        ? \App\Models\User::query()
-            ->whereHas('roles', fn ($query) => $query->where('name', 'user'))
-            ->count()
-        : null;
+    $customerCount = $isAdmin ? \App\Models\User::query()->shoppers()->count() : null;
 @endphp
 
 <nav aria-label="{{ $isAdmin ? 'Admin' : 'Account' }}" class="side" id="sidebar">

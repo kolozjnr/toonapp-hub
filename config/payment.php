@@ -18,6 +18,7 @@ return [
     'paystack' => [
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),
         'secret_key' => env('PAYSTACK_SECRET_KEY'),
+        'currency' => env('PAYSTACK_CURRENCY', 'NGN'),
         'callback_url' => env('PAYSTACK_CALLBACK_URL', env('APP_URL').'/payment/paystack/callback'),
     ],
 
