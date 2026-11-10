@@ -1,0 +1,235 @@
+
+name: Deploy ToonApp Hub to Namecheap
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toonapphub-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      # 1. Download repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configure PHP 8.4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, bcmath, curl, dom, fileinfo, intl, pdo_mysql, pdo_sqlite, tokenizer, xml, zip, gd
+          coverage: none
+
+      # 3. Configure Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # 4. Build Laravel application
+      - name: Install Composer dependencies
+        run: |
+          cp .env.example .env
+
+          composer install \
+            --no-interaction \
+            --prefer-dist \
+            --no-progress \
+            --no-dev \
+            --optimize-autoloader
+
+      # 5. Build frontend assets
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+
+          test -f public/build/manifest.json
+
+          # Never transfer the temporary CI environment file.
+          rm -f .env
+
+      # 6. Configure SSH
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      # 7. Prepare hosting directories
+      - name: Prepare Namecheap directories
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          PUBLIC_PATH: ${{ secrets.PUBLIC_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -p "$PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$USERNAME@$HOST" \
+            "mkdir -p \
+              '$DEPLOY_PATH/storage/app/public' \
+              '$DEPLOY_PATH/storage/framework/cache/data' \
+              '$DEPLOY_PATH/storage/framework/sessions' \
+              '$DEPLOY_PATH/storage/framework/views' \
+              '$DEPLOY_PATH/storage/logs' \
+              '$DEPLOY_PATH/bootstrap/cache' \
+              '$PUBLIC_PATH'"
+
+      # 8. Deploy Laravel application
+      - name: Deploy application files
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            --exclude='/.env' \
+            --exclude='/storage/' \
+            --exclude='/.git/' \
+            --exclude='/.github/' \
+            --exclude='/node_modules/' \
+            --exclude='/tests/' \
+            --exclude='/public/storage' \
+            --exclude='/public/hot' \
+            -e "ssh -i $HOME/.ssh/deploy_key -p $PORT -o StrictHostKeyChecking=yes" \
+            ./ "$USERNAME@$HOST:$DEPLOY_PATH/"
+
+      # 9. Publish public assets
+      - name: Deploy public assets
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          PUBLIC_PATH: ${{ secrets.PUBLIC_PATH }}
+        run: |
+          rsync -az --delete \
+            --exclude='/index.php' \
+            --exclude='/.well-known/' \
+            --exclude='/storage/' \
+            --exclude='/hot' \
+            -e "ssh -i $HOME/.ssh/deploy_key -p $PORT -o StrictHostKeyChecking=yes" \
+            public/ "$USERNAME@$HOST:$PUBLIC_PATH/"
+
+      # 10. Generate the correct public entry point
+      - name: Create production index.php
+        run: |
+          cat > "$RUNNER_TEMP/index.php" <<'PHP'
+          <?php
+
+          use Illuminate\Foundation\Application;
+          use Illuminate\Http\Request;
+
+          define('LARAVEL_START', microtime(true));
+
+          $laravelRoot = dirname(__DIR__) . '/toonapp-hub';
+
+          if (file_exists($maintenance = $laravelRoot . '/storage/framework/maintenance.php')) {
+              require $maintenance;
+          }
+
+          require $laravelRoot . '/vendor/autoload.php';
+
+          /** @var Application $app */
+          $app = require_once $laravelRoot . '/bootstrap/app.php';
+
+          // The real public directory is public_html.
+          $app->usePublicPath(__DIR__);
+
+          $app->handleRequest(Request::capture());
+          PHP
+
+      - name: Deploy production entry point
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          PUBLIC_PATH: ${{ secrets.PUBLIC_PATH }}
+        run: |
+          rsync -az \
+            -e "ssh -i $HOME/.ssh/deploy_key -p $PORT -o StrictHostKeyChecking=yes" \
+            "$RUNNER_TEMP/index.php" \
+            "$USERNAME@$HOST:$PUBLIC_PATH/index.php"
+
+      # 11. Configure public storage
+      - name: Configure storage link
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          PUBLIC_PATH: ${{ secrets.PUBLIC_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -p "$PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$USERNAME@$HOST" \
+            "if [ ! -e '$PUBLIC_PATH/storage' ] && [ ! -L '$PUBLIC_PATH/storage' ]; then
+               ln -s '$DEPLOY_PATH/storage/app/public' '$PUBLIC_PATH/storage'
+             fi"
+
+      # 12. Run production Laravel commands
+      - name: Run Laravel deployment commands
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -p "$PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$USERNAME@$HOST" \
+            "bash -s" <<REMOTE
+          set -e
+
+          cd "$DEPLOY_PATH"
+
+          chmod -R u+rwX storage bootstrap/cache
+
+          if [ ! -f .env ]; then
+            echo "Production .env is not configured yet."
+            echo "Application files deployed. Database migrations skipped."
+            exit 0
+          fi
+
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+
+          php artisan migrate --force
+
+          php artisan config:cache
+          php artisan view:cache
+
+          echo "ToonApp Hub deployment completed successfully."
+          REMOTE
