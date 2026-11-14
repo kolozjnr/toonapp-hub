@@ -201,26 +201,29 @@
                                         </td>
                                         <td>
                                             <div class="acts">
-                                                <button
-                                                    class="btn xs ghost"
-                                                    data-email="{{ $order->user?->email }}"
-                                                    data-resend="{{ $order->reference }}"
-                                                    type="button"
-                                                >
-                                                    <svg
-                                                        fill="none"
-                                                        height="18"
-                                                        stroke="currentColor"
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        viewBox="0 0 24 24"
-                                                        width="18"
+                                                @if ($order->isSuccessful())
+                                                    <form
+                                                        method="post"
+                                                        action="{{ route('admin.orders.resend', $order) }}"
                                                     >
-                                                        <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                        <path d="m4 7 8 6 8-6"></path></svg
-                                                    >Resend links
-                                                </button>
+                                                        @csrf
+                                                        <button class="btn xs ghost" type="submit">
+                                                            <svg
+                                                                fill="none"
+                                                                height="18"
+                                                                stroke="currentColor"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                viewBox="0 0 24 24"
+                                                                width="18"
+                                                            >
+                                                                <rect height="14" rx="2" width="18" x="3" y="5"></rect>
+                                                                <path d="m4 7 8 6 8-6"></path></svg
+                                                            >Resend links
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -261,18 +264,4 @@
             </div>
         </div>
        
-        @push('scripts')
-            <script>
-                /* Admin orders: re-send download links to the customer. (Search is in ui.js.) */
-                (function () {
-                    "use strict";
-                    document.getElementById("orderRows").addEventListener("click", function (e) {
-                        var btn = e.target.closest("[data-resend]");
-                        if (!btn) return;
-                        // DEMO: Laravel emails the download links for this order.
-                        Toon.toast("Download links sent to " + (btn.dataset.email || "the customer"));
-                    });
-                })();
-            </script>
-        @endpush
     </x-app-layout>

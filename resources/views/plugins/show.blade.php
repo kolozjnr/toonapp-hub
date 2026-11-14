@@ -30,8 +30,8 @@
         data-name="{{ $plugin->name }}"
         data-price="{{ $price }}"
         data-product=""
-        data-rating="0"
-        data-reviews="0"
+        data-rating="{{ $stats['average'] }}"
+        data-reviews="{{ $stats['total'] }}"
         data-tagline="{{ $plugin->tagline }}"
         data-tutorial="{{ filled($plugin->youtube_url) ? '1' : '0' }}"
         data-url="{{ $productUrl }}"
@@ -84,13 +84,16 @@
                 </div>
                 <h1>{{ $plugin->name }}</h1>
                 <span class="rate"
-                    ><span aria-label="No ratings yet" class="stars"
-                        ><i class="off">★</i><i class="off">★</i><i class="off">★</i><i class="off">★</i><i
-                            class="off"
-                            >★</i
-                        ></span
-                    >
-                    No ratings yet</span
+                    >@if ($stats['total'] > 0)
+                        @include('partials.stars', ['rating' => $stats['average']])
+                        {{ $stats['average'] }} · {{ $stats['total'] }} {{ \Illuminate\Support\Str::plural('rating', $stats['total']) }}
+                    @else
+                        <span aria-label="No ratings yet" class="stars"
+                            ><i class="off">★</i><i class="off">★</i><i class="off">★</i><i class="off">★</i
+                                ><i class="off">★</i></span
+                            >
+                            No ratings yet
+                        @endif</span
                 >
                 @if ($plugin->tagline)
                     <p class="pp-tag">{{ $plugin->tagline }}</p>
@@ -210,10 +213,49 @@
                 <section class="pp-card" id="reviews">
                     <div class="reviews">
                         <h3>Ratings &amp; reviews</h3>
-                        <div class="mini">
-                            <span>No ratings yet.</span>
-                            <span class="note">Reviews will appear here once customers rate this plugin.</span>
-                        </div>
+
+                        @if ($stats['total'] === 0)
+                            <div class="mini">
+                                <span>No ratings yet.</span>
+                                <span class="note">Reviews will appear here once customers rate this plugin.</span>
+                            </div>
+                        @else
+                            <div class="rsum">
+                                <div>
+                                    <div class="big">{{ $stats['average'] }}</div>
+                                    @include('partials.stars', ['rating' => $stats['average']])
+                                    <div class="note">
+                                        {{ $stats['total'] }} {{ \Illuminate\Support\Str::plural('review', $stats['total']) }}
+                                    </div>
+                                </div>
+                                <div class="dist">
+                                    @foreach ($stats['bands'] as $band)
+                                        <div>
+                                            <span>{{ $band['stars'] }}</span>
+                                            <div class="track">
+                                                @if ($band['width'] > 0)
+                                                    <span class="w-{{ $band['width'] }}"></span>
+                                                @endif
+                                            </div>
+                                            <span>{{ $band['count'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            @foreach ($reviews as $review)
+                                <div class="rv">
+                                    <div class="top">
+                                        <span>{{ $review->user?->name ?? 'Deleted customer' }}</span>
+                                        @include('partials.stars', ['rating' => $review->rating])
+                                    </div>
+                                    @if (filled($review->comment))
+                                        <p>{{ $review->comment }}</p>
+                                    @endif
+                                    <span class="note">{{ $review->created_at->format('d M Y') }}</span>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </section>
             </div>

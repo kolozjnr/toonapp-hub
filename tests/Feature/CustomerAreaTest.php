@@ -1,9 +1,11 @@
 <?php
 
+use App\Mail\OrderDownloadMail;
 use App\Models\Payment;
 use App\Models\Plugin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
@@ -171,4 +173,115 @@ test('a shopper with no orders or updates sees empty states instead of sample ro
         ->get(route('customer.dashboard'))
         ->assertOk()
         ->assertSee("You don't own any plugins yet", false);
+});
+
+test('a shopper can have the download links for one of their orders emailed again', function () {
+    Mail::fake();
+
+    $shopper = User::factory()->create(['name' => 'Ada Obi', 'email' => 'ada@example.com']);
+    $plugin = Plugin::create([
+        'name' => 'Toon Shadows',
+        'price' => 105,
+        'download_url' => 'https://example.com/toon-shadows.zip',
+    ]);
+    $order = customerOwnedOrder($shopper, $plugin, 10500);
+
+    $this->actingAs($shopper)
+        ->from(route('customer.orders'))
+        ->post(route('customer.orders.resend', $order))
+        ->assertRedirect(route('customer.orders'))
+        ->assertSessionHas('success');
+
+    Mail::assertSent(
+        OrderDownloadMail::class,
+        fn (OrderDownloadMail $mail): bool => $mail->hasTo('ada@example.com')
+            && $mail->recipientName === 'Ada Obi'
+            && $mail->reference === $order->reference
+            && $mail->downloads === [['name' => 'Toon Shadows', 'url' => 'https://example.com/toon-shadows.zip']]
+    );
+});
+
+test('a shopper cannot have the download links for an order they did not place', function () {
+    Mail::fake();
+
+    $shopper = User::factory()->create();
+    $order = customerOwnedOrder(User::factory()->create(), Plugin::create([
+        'name' => 'Toon Shadows',
+        'price' => 105,
+        'download_url' => 'https://example.com/toon-shadows.zip',
+    ]), 10500);
+
+    $this->actingAs($shopper)
+        ->post(route('customer.orders.resend', $order))
+        ->assertNotFound();
+
+    Mail::assertNothingSent();
+});
+
+test('a guest cannot have download links emailed', function () {
+    $order = customerOwnedOrder(User::factory()->create(), Plugin::create([
+        'name' => 'Toon Shadows',
+        'price' => 105,
+        'download_url' => 'https://example.com/toon-shadows.zip',
+    ]), 10500);
+
+    $this->post(route('customer.orders.resend', $order))->assertRedirect(route('login'));
+});
+
+test('an unpaid order cannot have its links emailed to the shopper', function () {
+    Mail::fake();
+
+    $shopper = User::factory()->create();
+    $plugin = Plugin::create([
+        'name' => 'Toon Shadows',
+        'price' => 105,
+        'download_url' => 'https://example.com/toon-shadows.zip',
+    ]);
+    $order = Payment::factory()->for($shopper)->create([
+        'status' => Payment::STATUS_PENDING,
+        'items' => [['plugin_id' => $plugin->id, 'name' => $plugin->name, 'price' => 105]],
+    ]);
+
+    $this->actingAs($shopper)
+        ->from(route('customer.orders'))
+        ->post(route('customer.orders.resend', $order))
+        ->assertRedirect(route('customer.orders'))
+        ->assertSessionHas('error');
+
+    Mail::assertNothingSent();
+});
+
+test('an order whose plugins have no download link is reported instead of emailed', function () {
+    Mail::fake();
+
+    $shopper = User::factory()->create();
+    $order = customerOwnedOrder($shopper, Plugin::create(['name' => 'Bounce Presets', 'price' => 105]), 10500);
+
+    $this->actingAs($shopper)
+        ->from(route('customer.orders'))
+        ->post(route('customer.orders.resend', $order))
+        ->assertRedirect(route('customer.orders'))
+        ->assertSessionHas('error');
+
+    Mail::assertNothingSent();
+});
+
+test('the email my links button only appears on orders that have been paid', function () {
+    $shopper = User::factory()->create();
+    $plugin = Plugin::create([
+        'name' => 'Toon Shadows',
+        'price' => 105,
+        'download_url' => 'https://example.com/toon-shadows.zip',
+    ]);
+    $paid = customerOwnedOrder($shopper, $plugin, 10500);
+    $pending = Payment::factory()->for($shopper)->create([
+        'status' => Payment::STATUS_PENDING,
+        'items' => [['plugin_id' => $plugin->id, 'name' => $plugin->name, 'price' => 105]],
+    ]);
+
+    $this->actingAs($shopper)
+        ->get(route('customer.orders'))
+        ->assertOk()
+        ->assertSee(route('customer.orders.resend', $paid), false)
+        ->assertDontSee(route('customer.orders.resend', $pending), false);
 });

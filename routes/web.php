@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('plugins/{plugin}/visibility', [AdminPluginController::class, 'toggle'])->name('plugins.toggle');
         Route::delete('plugins/{plugin}', [AdminPluginController::class, 'destroy'])->name('plugins.destroy');
         Route::get('orders', [AdminOrderController::class, 'index'])->name('orders');
+        Route::post('orders/{payment}/resend', [AdminOrderController::class, 'resend'])->name('orders.resend');
         Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers');
         Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews');
         Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
@@ -101,6 +102,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('plugins', [CustomerPluginsController::class, 'index'])->name('plugins');
         Route::post('plugins/{plugin}/review', [CustomerReviewController::class, 'store'])->name('plugins.review');
         Route::get('orders', [CustomerOrderController::class, 'index'])->name('orders');
+        Route::post('orders/{payment}/resend', [CustomerOrderController::class, 'resend'])->name('orders.resend');
         Route::get('settings', [CustomerSettingsController::class, 'index'])->name('settings');
         Route::put('settings/profile', [CustomerSettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::put('settings/password', [CustomerSettingsController::class, 'updatePassword'])->name('settings.password');

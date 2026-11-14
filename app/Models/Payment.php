@@ -145,6 +145,38 @@ class Payment extends Model
     }
 
     /**
+     * Every plugin on this order the buyer can download, paired with the
+     * link the administrator uploaded for it. The cart snapshot only holds
+     * the id, name and price, so the link always comes from the plugin row:
+     * a plugin taken off the shelf keeps its name but loses its link, and a
+     * deleted one is skipped entirely.
+     *
+     * @return list<array{name: string, url: string}>
+     */
+    public function downloadLinks(): array
+    {
+        $plugins = Plugin::query()
+            ->whereIn('id', collect($this->items)->pluck('plugin_id')->filter()->unique()->all())
+            ->get()
+            ->keyBy('id');
+
+        $links = [];
+
+        foreach ($this->items ?? [] as $item) {
+            $plugin = $plugins->get((int) ($item['plugin_id'] ?? 0));
+
+            if ($plugin?->download_url) {
+                $links[] = [
+                    'name' => $plugin->name,
+                    'url' => $plugin->download_url,
+                ];
+            }
+        }
+
+        return $links;
+    }
+
+    /**
      * The amount formatted for display, e.g. "25.00 NGN".
      */
     public function amountLabel(): string

@@ -126,26 +126,27 @@
                                         <td>
                                             @if ($order->isSuccessful())
                                                 <div class="acts">
-                                                    <button
-                                                        class="btn xs ghost"
-                                                        data-email="{{ Auth::user()->email }}"
-                                                        data-resend="{{ $order->reference }}"
-                                                        type="button"
+                                                    <form
+                                                        method="post"
+                                                        action="{{ route('customer.orders.resend', $order) }}"
                                                     >
-                                                        <svg
-                                                            fill="none"
-                                                            height="18"
-                                                            stroke="currentColor"
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            viewBox="0 0 24 24"
-                                                            width="18"
-                                                        >
-                                                            <rect height="14" rx="2" width="18" x="3" y="5"></rect>
-                                                            <path d="m4 7 8 6 8-6"></path></svg
-                                                        >Email my links
-                                                    </button>
+                                                        @csrf
+                                                        <button class="btn xs ghost" type="submit">
+                                                            <svg
+                                                                fill="none"
+                                                                height="18"
+                                                                stroke="currentColor"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                viewBox="0 0 24 24"
+                                                                width="18"
+                                                            >
+                                                                <rect height="14" rx="2" width="18" x="3" y="5"></rect>
+                                                                <path d="m4 7 8 6 8-6"></path></svg
+                                                            >Email my links
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             @endif
                                         </td>
@@ -187,18 +188,4 @@
             </div>
         </div>
 
-        @push('scripts')
-            <script>
-                /* Customer orders: re-send the download links for an order. */
-                (function () {
-                    "use strict";
-                    document.getElementById("content").addEventListener("click", function (e) {
-                        var btn = e.target.closest("[data-resend]");
-                        if (!btn) return;
-                        // DEMO: Laravel emails the download links for this order.
-                        Toon.toast("Download links sent to " + (btn.dataset.email || "your address"));
-                    });
-                })();
-            </script>
-        @endpush
     </x-app-layout>

@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Plugin;
+use App\Models\Review;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -118,4 +120,87 @@ test('hidden plugins cannot be previewed', function () {
     ]);
 
     $this->get(route('plugins.show', $plugin->slug))->assertNotFound();
+});
+
+test('the plugin page lists every review shoppers left on it, newest first', function () {
+    $plugin = Plugin::create(['name' => 'Reviewed Plugin', 'price' => 29, 'category' => 'Plugin']);
+
+    Review::factory()->for(User::factory()->create(['name' => 'Ada Okafor']))->for($plugin)->create([
+        'rating' => 5,
+        'comment' => 'Saved me hours on a client job.',
+        'created_at' => '2026-10-20 09:00:00',
+    ]);
+    Review::factory()->for(User::factory()->create(['name' => 'Liam Chen']))->for($plugin)->create([
+        'rating' => 3,
+        'comment' => null,
+        'created_at' => '2026-10-28 09:00:00',
+    ]);
+
+    $response = $this->get(route('plugins.show', $plugin->slug));
+
+    $response->assertOk()
+        ->assertSee('Ada Okafor')
+        ->assertSee('Saved me hours on a client job.')
+        ->assertSee('20 Oct 2026')
+        ->assertSee('Liam Chen')
+        ->assertSee('28 Oct 2026');
+
+    // A review without a comment still shows its stars and date.
+    expect($response->viewData('reviews')->pluck('comment')->all())
+        ->toBe([null, 'Saved me hours on a client job.']);
+});
+
+test('the plugin page summarises the average rating and the star breakdown', function () {
+    $plugin = Plugin::create(['name' => 'Reviewed Plugin', 'price' => 29, 'category' => 'Plugin']);
+
+    Review::factory()->create(['rating' => 5, 'plugin_id' => $plugin->id]);
+    Review::factory()->create(['rating' => 4, 'plugin_id' => $plugin->id]);
+
+    $response = $this->get(route('plugins.show', $plugin->slug));
+
+    $response->assertOk()
+        ->assertSee('4.5')
+        ->assertSee('2 reviews')
+        ->assertSee('class="w-50"', false);
+
+    expect($response->viewData('stats'))->toBe([
+        'average' => '4.5',
+        'total' => 2,
+        'bands' => [
+            ['stars' => 5, 'count' => 1, 'width' => 50],
+            ['stars' => 4, 'count' => 1, 'width' => 50],
+            ['stars' => 3, 'count' => 0, 'width' => 0],
+            ['stars' => 2, 'count' => 0, 'width' => 0],
+            ['stars' => 1, 'count' => 0, 'width' => 0],
+        ],
+    ]);
+});
+
+test('the plugin page only counts reviews left on that plugin', function () {
+    $plugin = Plugin::create(['name' => 'Reviewed Plugin', 'price' => 29, 'category' => 'Plugin']);
+    $other = Plugin::create(['name' => 'Other Plugin', 'price' => 12, 'category' => 'Plugin']);
+
+    Review::factory()->create([
+        'rating' => 1,
+        'comment' => 'Not for me.',
+        'plugin_id' => $other->id,
+    ]);
+
+    $response = $this->get(route('plugins.show', $plugin->slug));
+
+    $response->assertOk()
+        ->assertSee('No ratings yet.')
+        ->assertDontSee('Not for me.');
+
+    expect($response->viewData('stats')['total'])->toBe(0);
+});
+
+test('a plugin with no reviews shows the empty ratings block', function () {
+    $plugin = Plugin::create(['name' => 'Unreviewed Plugin', 'price' => 15, 'category' => 'Plugin']);
+
+    $this->get(route('plugins.show', $plugin->slug))
+        ->assertOk()
+        ->assertSee('No ratings yet.')
+        ->assertSee('Reviews will appear here once customers rate this plugin.')
+        ->assertDontSee('class="rv"', false);
 });
